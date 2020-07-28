@@ -2,14 +2,12 @@
 title: "Prosocial_learning_analysis"
 author: "Jo Cutler & Patricia Lockwood"
 date: "28/01/2020"
-output: 
-  html_document:
-    keep_md: true
+output: html_document
 ---
 
-```{r setup, include=FALSE}
-
 ## Set up and functions
+
+```{r setup, include=FALSE}
 
 knitr::opts_chunk$set(echo = TRUE)
 options(digits = 2)
@@ -217,9 +215,9 @@ stats.rlmMod.f <- function(object, level = 0.95) {
 
 ```
 
-```{r echo=FALSE}
-
 ## General settings
+
+```{r}
 
 # 1 to save plots, 0 to not save
 saveplots <- 0
@@ -234,7 +232,7 @@ axtitle <- 20
 
 ## Plots of model identifiability, parameter recovery & model fit
 
-``` {r echo=FALSE}
+``` {r}
 
 modplotW <- plotH * 1.55 # set up dimensions to save figure
 modprplotW <- plotH * 1.63
@@ -392,9 +390,9 @@ if (saveplots == 1) {dev.off()}
 
 ```
 
-```{r echo=FALSE, eval=FALSE}
-
 ## Compare model fit between groups
+
+```{r}
 
 # loads data
 group.fit <- read_xlsx("Compare_fit_between_groups.xlsx", sheet = 1, col_names = T) 
@@ -421,9 +419,11 @@ fit.es <- group.fit %>% wilcox_effsize(fit ~ group, ci = TRUE)
 
 ```
 
-## Trial-by-trial plot
+## Trial-by-trial analysis and plot (checking learning):
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, results='hide', fig.keep='last'}
+```{r message=FALSE, warning=FALSE, results='hide', fig.keep='last'}
+
+# [Note method to format figure outputs lots of text and multiple versions so suppress output here]
 
 ## Load and organise the data
 
@@ -558,7 +558,7 @@ if (saveplots == 1) {
 
 ## Model predicting choices across conditions
 
-```{r, echo=FALSE}
+```{r}
 
 df.tbt.c <- subset(df.tbt.c, ID != 216) # remove outliers
 df.tbt.c <- subset(df.tbt.c, ID != 253)
@@ -574,9 +574,9 @@ kable(performstats,
 
 ```
 
-```{r echo=FALSE}
-
 ## Analysis of RL parameters from model with 3 alphas, 1 beta
+
+```{r}
 
 ## Load and organise the data
 
@@ -633,7 +633,7 @@ df.l <- df.full                                                             %>%
 
 ```
 
-```{r echo=FALSE}
+```{r}
 
 ## Demographics
 
@@ -667,7 +667,7 @@ diff.education.es <- df.full %>% wilcox_effsize(Education_years ~ group, ci = TR
 
 ```
 
-```{r echo=FALSE, eval=FALSE}
+```{r}
 
 ## Plot histograms and check skew & kurtosis
 
@@ -690,7 +690,7 @@ describe(df.full$SRP_lifestyle_antisocial) # skew > 1.61, kurtosis > 3.11 **
 
 ## Model of alpha
 
-```{r echo=FALSE, message=FALSE}
+```{r}
 
 ## Use robust linear mixed effects models to analyse the data due to heavily skewed distribution
 
@@ -709,9 +709,11 @@ kable(alphastats,
 
 ```
 
+## Post hocs
+
 ## Wilcoxon signed rank test on self, other and noone parameters for each group separately
 
-```{r echo=FALSE}
+```{r}
 
 df.full <- df.full %>% drop_na("agent1-alpha")
 
@@ -905,7 +907,7 @@ wil.beta.es <- df.full %>% wilcox_effsize(beta_152 ~ group, ci = TRUE)
 
 ## Differences between young and old on psychopathy
 
-```{r echo=FALSE}
+```{r}
 
 df.full.srp <- df.full %>% drop_na("agent1-alpha") %>% 
   drop_na("SRP_affective_interpersonal")
@@ -967,7 +969,7 @@ kable(id.diff.table,
 
 ## Correlations between traits and learning parameters
 
-```{r echo=FALSE}
+```{r}
 
 # SRP - affective interpersonal & alphas
 
@@ -1118,7 +1120,7 @@ pr.otherself.ai <- paired.r(pcorr.young.os.ai$estimate, pcorr.old.os.ai$estimate
 
 ## Plots of main effects
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r}
 
 titles <- c("Learning rate (\u03B1)")
 names <- c("Alpha")
@@ -1283,7 +1285,7 @@ if (saveplots == 1) {dev.off()}
 
 ## Plots of correlations
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r}
 
 selfcorcols <- c('#365F91', '#6EB3E4')
 othercorcols <- c('#3C859A', '#009E99')

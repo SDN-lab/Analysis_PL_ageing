@@ -7,11 +7,7 @@ output:
     keep_md: true
 ---
 
-## Set up and functions
 
-
-
-## General settings
 
 
 
@@ -19,19 +15,138 @@ output:
 
 ![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-2-1.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-2-2.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-2-3.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-2-4.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-2-5.png)<!-- -->
 
-## Compare model fit between groups
 
 
-
-## Trial-by-trial analysis and plot (checking learning):
+## Trial-by-trial plot
 
 ![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 ## Model predicting choices across conditions
 
-
-
-## Analysis of RL parameters from model with 3 alphas, 1 beta
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Robust linear mixed model for choice performance</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:center;"> beta </th>
+   <th style="text-align:center;"> 2.5 % </th>
+   <th style="text-align:center;"> 97.5 % </th>
+   <th style="text-align:center;"> SE </th>
+   <th style="text-align:center;"> z </th>
+   <th style="text-align:center;"> p </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Intercept </td>
+   <td style="text-align:center;"> 2.300 </td>
+   <td style="text-align:center;"> 1.908 </td>
+   <td style="text-align:center;"> 2.608 </td>
+   <td style="text-align:center;"> 0.180 </td>
+   <td style="text-align:center;"> 12.65 </td>
+   <td style="text-align:center;"> &lt;0.001 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Trial number </td>
+   <td style="text-align:center;"> 1.700 </td>
+   <td style="text-align:center;"> 1.292 </td>
+   <td style="text-align:center;"> 2.134 </td>
+   <td style="text-align:center;"> 0.210 </td>
+   <td style="text-align:center;"> 7.97 </td>
+   <td style="text-align:center;"> &lt;0.001 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Agent (other vs self) </td>
+   <td style="text-align:center;"> -0.220 </td>
+   <td style="text-align:center;"> -0.492 </td>
+   <td style="text-align:center;"> 0.045 </td>
+   <td style="text-align:center;"> 0.140 </td>
+   <td style="text-align:center;"> -1.63 </td>
+   <td style="text-align:center;"> 0.10 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Agent (no one vs self) </td>
+   <td style="text-align:center;"> -0.360 </td>
+   <td style="text-align:center;"> -0.675 </td>
+   <td style="text-align:center;"> -0.051 </td>
+   <td style="text-align:center;"> 0.160 </td>
+   <td style="text-align:center;"> -2.28 </td>
+   <td style="text-align:center;"> 0.023 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Group (older vs younger) </td>
+   <td style="text-align:center;"> -1.200 </td>
+   <td style="text-align:center;"> -1.652 </td>
+   <td style="text-align:center;"> -0.700 </td>
+   <td style="text-align:center;"> 0.240 </td>
+   <td style="text-align:center;"> -4.84 </td>
+   <td style="text-align:center;"> &lt;0.001 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Trial number * agent (other vs self) </td>
+   <td style="text-align:center;"> 0.270 </td>
+   <td style="text-align:center;"> -0.165 </td>
+   <td style="text-align:center;"> 0.710 </td>
+   <td style="text-align:center;"> 0.220 </td>
+   <td style="text-align:center;"> 1.22 </td>
+   <td style="text-align:center;"> 0.22 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Trial number * agent (no one vs self) </td>
+   <td style="text-align:center;"> 0.089 </td>
+   <td style="text-align:center;"> -0.370 </td>
+   <td style="text-align:center;"> 0.549 </td>
+   <td style="text-align:center;"> 0.230 </td>
+   <td style="text-align:center;"> 0.38 </td>
+   <td style="text-align:center;"> 0.70 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Trial number * group </td>
+   <td style="text-align:center;"> -0.810 </td>
+   <td style="text-align:center;"> -1.340 </td>
+   <td style="text-align:center;"> -0.270 </td>
+   <td style="text-align:center;"> 0.270 </td>
+   <td style="text-align:center;"> -2.95 </td>
+   <td style="text-align:center;"> 0.003 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Group * agent (other vs self) </td>
+   <td style="text-align:center;"> 0.160 </td>
+   <td style="text-align:center;"> -0.166 </td>
+   <td style="text-align:center;"> 0.484 </td>
+   <td style="text-align:center;"> 0.170 </td>
+   <td style="text-align:center;"> 0.96 </td>
+   <td style="text-align:center;"> 0.34 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Group * agent (no one vs self) </td>
+   <td style="text-align:center;"> 0.160 </td>
+   <td style="text-align:center;"> -0.241 </td>
+   <td style="text-align:center;"> 0.552 </td>
+   <td style="text-align:center;"> 0.200 </td>
+   <td style="text-align:center;"> 0.77 </td>
+   <td style="text-align:center;"> 0.44 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Trial number * group * agent (other vs self) </td>
+   <td style="text-align:center;"> -0.007 </td>
+   <td style="text-align:center;"> -0.504 </td>
+   <td style="text-align:center;"> 0.489 </td>
+   <td style="text-align:center;"> 0.250 </td>
+   <td style="text-align:center;"> -0.03 </td>
+   <td style="text-align:center;"> 0.98 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Trial number * group * agent (no one vs self) </td>
+   <td style="text-align:center;"> -0.040 </td>
+   <td style="text-align:center;"> -0.580 </td>
+   <td style="text-align:center;"> 0.499 </td>
+   <td style="text-align:center;"> 0.280 </td>
+   <td style="text-align:center;"> -0.15 </td>
+   <td style="text-align:center;"> 0.88 </td>
+  </tr>
+</tbody>
+</table>
 
 
 
@@ -111,8 +226,6 @@ output:
   </tr>
 </tbody>
 </table>
-
-## Post hocs
 
 ## Wilcoxon signed rank test on self, other and noone parameters for each group separately
 
