@@ -4,6 +4,8 @@
 - #### ii) analysis on the model parameters and trial by trial behavioural data [subfolder Prosocial_learning_R_code]
 - #### iii) model identifiability and parameter recovery [subfolder Model_simulated_data]
 
+[Click here to view plots and main results](https://github.com/SDN-lab/Analysis_PL_ageing/blob/master/Prosocial_learning_R_code/Prosocial_learning_analysis.md)
+
 ### For analysis of the real participant data (i & ii):
 
 #### Step 1 - Run_em_model.m 
