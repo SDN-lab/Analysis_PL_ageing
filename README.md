@@ -39,11 +39,11 @@ Run analysis using R project, script, and files from above output (note sections
 #### Step 1 - Simulate_PR_MI.m 
 Script to run model identifiability and / or parameter recovery
 
-### #Step 2 - Prosocial_learning_analysis.Rmd 
+#### Step 2 - Prosocial_learning_analysis.Rmd 
 Plot results using R script
 
 ### Prosocial learning models 
-Based [Lockwood et PL. (2016), *PNAS*](https://doi.org/10.1073/pnas.1603198113) - test different variations of learning rate and beta parameters
+Based on [Lockwood et PL. (2016), *PNAS*](https://doi.org/10.1073/pnas.1603198113) - test different variations of learning rate and beta parameters
 
 #### Models compared:
 ##### M1 = **'RWPL'**
