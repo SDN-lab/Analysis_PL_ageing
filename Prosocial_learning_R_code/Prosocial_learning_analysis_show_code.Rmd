@@ -674,7 +674,7 @@ diff.education.es <- df.full %>% wilcox_effsize(Education_years ~ group, ci = TR
 hist(df.full$`agent1-alpha`)
 hist(df.full$`agent2-alpha`)
 hist(df.full$`agent3-alpha`)
-hist(df.full$beta_152)
+hist(df.full$PL_beta)
 hist(df.full$SRP_affective_interpersonal)
 hist(df.full$SRP_lifestyle_antisocial)
 hist(df.full$Education_years)
@@ -682,7 +682,7 @@ hist(df.full$Education_years)
 describe(df.full$`agent1-alpha`) # skew > 1.4, kurtosis > 1.75 **
 describe(df.full$`agent2-alpha`) # skew = 0, kurtosis < .1 (use robust to match other alphas)
 describe(df.full$`agent3-alpha`) # skew > 1.6, kurtosis > 3.85 **
-describe(df.full$beta_152) # skew > 1.8, kurtosis > 2.8 **
+describe(df.full$PL_beta) # skew > 1.8, kurtosis > 2.8 **
 describe(df.full$SRP_affective_interpersonal) # skew > 1.77, kurtosis > 4.07 **
 describe(df.full$SRP_lifestyle_antisocial) # skew > 1.61, kurtosis > 3.11 **
 
@@ -888,12 +888,12 @@ wil.old.es <- subset(df.l, group == "old") %>%
 
 ## Wilcoxon signed rank test on betas
 
-df.full <- df.full %>% drop_na("beta_152")
+df.full <- df.full %>% drop_na("PL_beta")
 
 ## comparison of betas, young vs older
 wil.beta <- wilcox.test(
-  df.full$beta_152[df.full$group == "young"],
-  df.full$beta_152[df.full$group == "old"],
+  df.full$PL_beta[df.full$group == "young"],
+  df.full$PL_beta[df.full$group == "old"],
   paired = FALSE)
 
 if (wil.beta$p.value < .05) { ph.sig.b <- "*" 
@@ -901,7 +901,7 @@ if (wil.beta$p.value < .05) { ph.sig.b <- "*"
 
 Zstat.beta <- qnorm(wil.beta$p.value/2)
 
-wil.beta.es <- df.full %>% wilcox_effsize(beta_152 ~ group, ci = TRUE)
+wil.beta.es <- df.full %>% wilcox_effsize(PL_beta ~ group, ci = TRUE)
 
 ```
 
@@ -1086,26 +1086,26 @@ corr.old.otherself.ai.ci <-
 
 # partial correlations
 
-df.full.pcorr <- df.full %>% tidyr::drop_na("agent2-alpha", "SRP_affective_interpersonal", "beta_152")
+df.full.pcorr <- df.full %>% tidyr::drop_na("agent2-alpha", "SRP_affective_interpersonal", "PL_beta")
 
 pcorr.young.other.ai <- pcor.test(df.full.pcorr$`agent2-alpha`[df.full.pcorr$Group == 1],
                                   df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 1],
-                                  df.full.pcorr$beta_152[df.full.pcorr$Group == 1], 
+                                  df.full.pcorr$PL_beta[df.full.pcorr$Group == 1], 
                                   method = "spearman")
 
 pcorr.old.other.ai <- pcor.test(df.full.pcorr$`agent2-alpha`[df.full.pcorr$Group == 2],
                                 df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
-                                df.full.pcorr$beta_152[df.full.pcorr$Group == 2], 
+                                df.full.pcorr$PL_beta[df.full.pcorr$Group == 2], 
                                 method = "spearman")
 
 pcorr.young.os.ai <- pcor.test(df.full.pcorr$`other-self_alph`[df.full.pcorr$Group == 1],
                                df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 1],
-                               df.full.pcorr$beta_152[df.full.pcorr$Group == 1], 
+                               df.full.pcorr$PL_beta[df.full.pcorr$Group == 1], 
                                method = "spearman")
 
 pcorr.old.os.ai <- pcor.test(df.full.pcorr$`other-self_alph`[df.full.pcorr$Group == 2],
                              df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
-                             df.full.pcorr$beta_152[df.full.pcorr$Group == 2], 
+                             df.full.pcorr$PL_beta[df.full.pcorr$Group == 2], 
                              method = "spearman")
 
 
@@ -1287,130 +1287,73 @@ if (saveplots == 1) {dev.off()}
 
 ```{r}
 
-selfcorcols <- c('#365F91', '#6EB3E4')
 othercorcols <- c('#3C859A', '#009E99')
-noonecorcols <- c('#60487A', '#7D30A0')
-oscorcols <- othercorcols
 
 corrplotH <- plotH
-corrplotW <- plotH * 1.625
-axtext <- 16
+corrplotW <- plotH
 
-## Plots of alpha with SRP psychopathy affective interpersonal subscale
+df.full.young <- subset(df.full, Group == 1)
+df.full.older <- subset(df.full, Group == 2)
 
-# plot self; dotplot of learning rate vs score on SRP affective interpersonal subscale
-# line of best fit; colour indicates age (young vs old)
+# plot older other; dotplot of learning rate vs score on SRP affective interpersonal subscale
 
-if (saveplots == 1) {tiff("Plots/SRP_ai_vs_alpha_self.tiff", units="in", width = corrplotW, height = corrplotH, res = resolution)}
+if (saveplots == 1) {tiff("Plots/SRP_ai_vs_alpha_other_older.tiff", units="in", width = corrplotW, height = corrplotH, res = resolution)}
 
-plot.self.ai <- ggplot(df.full, aes(x = `agent1-alpha`, y = SRP_affective_interpersonal)) + 
-  geom_point(aes(color = group, shape = group, alpha = group), size = 2, show.legend = FALSE) + 
+plot.other.ai.old <- ggplot(df.full.older, aes(x = `agent2-alpha`, y = SRP_affective_interpersonal)) + 
+  geom_point(aes(color = group, shape = group, alpha = group), size = 6, show.legend = FALSE) + 
   geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0.3, size = 0.75, show.legend = FALSE) + 
-  geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0, size = 0.75) +
-  scale_x_continuous(name = paste0("\u03B1","<sub>self</sub>"), n.breaks = 3) +
+  geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0, size = 2) +
+  scale_x_continuous(name = paste0("\u03B1","<sub>other</sub>"," (Older)"), breaks = c(0.02, 0.04, 0.06, 0.08, 0.1), labels = c('0.02', '0.04', '0.06', '0.08', '0.10')) +
   scale_y_continuous(name = "Trait psychopathy<br>
         <span style='font-size:14pt'>(Affective interpersonal subscale)</span>", breaks = seq(10, 60, 10)) + 
-  coord_cartesian(ylim=c(10, 60)) + 
-  scale_fill_manual(values = selfcorcols, labels = c('Young', 'Older'), name = "Group") + 
-  scale_color_manual(values = selfcorcols, labels = c('Young', 'Older'), name = "Group") + 
-  scale_linetype_manual(values = c("solid", "twodash"), labels = c('Young', 'Older'), name = "Group") +
-  scale_shape_manual(values = c(20,18), labels = c('Young', 'Older'), name = "Group") +
-  scale_alpha_manual(values = c(0.3,0.3), labels = c('Young', 'Older'), name = "Group") +
+  coord_cartesian(xlim=c(0.018, 0.102), ylim=c(10, 60)) + 
+  scale_fill_manual(values = othercorcols[2], labels = 'Older', name = "Group") + 
+  scale_color_manual(values = othercorcols[2], labels = 'Older', name = "Group") + 
+  scale_linetype_manual(values = "solid", labels = 'Older', name = "Group") +
+  scale_shape_manual(values = 20, labels = 'Older', name = "Group") +
+  scale_alpha_manual(values = 0.3, labels = 'Older', name = "Group") +
   theme_classic() + 
-  theme(legend.title = element_blank(), legend.text = element_text(size = axtext), legend.key.size = unit(3,"line")) + 
+  theme(legend.position = 'none') +
   theme(axis.text = element_markdown(size = axtext),
         axis.title.x = element_markdown(size = axtitle),
         axis.title.y = element_markdown(size = axtitle)) +
-  guides(shape = guide_legend(override.aes = list(size = 2)))
+  guides(shape = guide_legend(override.aes = list(size = 2))) +
+  annotate(geom='richtext', x = 0.038, y = 10, 
+           label = paste0("_r_","<sub>s</sub>=", round(corr.old.other.ai$r[1,2],2),", _p_=", round(corr.old.other.ai$P[1,2],3), "**"), 
+           fill = NA, label.color = NA)
 
-plot.self.ai
+plot.other.ai.old
 
 if (saveplots == 1) {dev.off()}
 
-# plot other; dotplot of learning rate vs score on SRP affective interpersonal subscale
-# line of best fit; colour indicates age (young vs old)
+# plot older other; dotplot of learning rate vs score on SRP affective interpersonal subscale
 
-if (saveplots == 1) {tiff("Plots/SRP_ai_vs_alpha_other.tiff", units="in", width = corrplotW, height = corrplotH, res = resolution)}
+if (saveplots == 1) {tiff("Plots/SRP_ai_vs_alpha_other_young.tiff", units="in", width = corrplotW, height = corrplotH, res = resolution)}
 
-plot.other.ai <- ggplot(df.full, aes(x = `agent2-alpha`, y = SRP_affective_interpersonal)) + 
-  geom_point(aes(color = group, shape = group, alpha = group), size = 2, show.legend = FALSE) +  
-  geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0.3, size = 0.75, show.legend = FALSE) +  
-  geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0, size = 0.75) +
-  scale_x_continuous(name = paste0("\u03B1","<sub>other</sub>"), n.breaks = 5) +
-  scale_y_continuous(name = "Trait psychopathy<br>
-        <span style='font-size:14pt'>(Affective interpersonal subscale)</span>", breaks = seq(10, 60, 10)) + 
-  coord_cartesian(ylim=c(10, 60)) + 
-  scale_fill_manual(values = othercorcols, labels = c('Young', 'Older'), name = "Group") + 
-  scale_color_manual(values = othercorcols, labels = c('Young', 'Older'), name = "Group") + 
-  scale_linetype_manual(values = c("solid", "twodash"), labels = c('Young', 'Older'), name = "Group") +
-  scale_shape_manual(values = c(20,18), labels = c('Young', 'Older'), name = "Group") +
-  scale_alpha_manual(values = c(0.3,0.3), labels = c('Young', 'Older'), name = "Group") +
-  theme_classic() + 
-  theme(legend.title = element_blank(), legend.text = element_text(size = axtext), legend.key.size = unit(3,"line")) + 
-  theme(axis.text = element_markdown(size = axtext),
-        axis.title.x = element_markdown(size = axtitle),
-        axis.title.y = element_markdown(size = axtitle)) +
-  guides(shape = guide_legend(override.aes = list(size = 2)))
-
-plot.other.ai
-
-if (saveplots == 1) {dev.off()}
-
-# plot no one; dotplot of learning rate vs score on SRP affective interpersonal subscale
-# line of best fit; colour indicates age (young vs old)
-
-if (saveplots == 1) {tiff("Plots/SRP_ai_vs_alpha_noone.tiff", units="in", width = corrplotW, height = corrplotH, res = resolution)}
-
-plot.noone.ai <- ggplot(df.full, aes(x = `agent3-alpha`, y = SRP_affective_interpersonal)) + 
-  geom_point(aes(color = group, shape = group, alpha = group), size = 2, show.legend = FALSE) + 
+plot.other.ai.young <- ggplot(df.full.young, aes(x = `agent2-alpha`, y = SRP_affective_interpersonal)) + 
+  geom_point(aes(color = group, shape = group, alpha = group), size = 6, show.legend = FALSE) + 
   geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0.3, size = 0.75, show.legend = FALSE) + 
-  geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0, size = 0.75) +
-  scale_x_continuous(name = paste0("\u03B1","<sub>no one</sub>"), n.breaks = 3) +
+  geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0, size = 2) +
+  scale_x_continuous(name = paste0("\u03B1","<sub>other</sub>"," (Younger)"), breaks = c(0.02, 0.04, 0.06, 0.08, 0.1), labels = c('0.02', '0.04', '0.06', '0.08', '0.10')) +
   scale_y_continuous(name = "Trait psychopathy<br>
         <span style='font-size:14pt'>(Affective interpersonal subscale)</span>", breaks = seq(10, 60, 10)) + 
-  coord_cartesian(ylim=c(10, 60)) + 
-  scale_fill_manual(values = noonecorcols, labels = c('Young', 'Older'), name = "Group") + 
-  scale_color_manual(values = noonecorcols, labels = c('Young', 'Older'), name = "Group") + 
-  scale_linetype_manual(values = c("solid", "twodash"), labels = c('Young', 'Older'), name = "Group") +
-  scale_shape_manual(values = c(20,18), labels = c('Young', 'Older'), name = "Group") +
-  scale_alpha_manual(values = c(0.3,0.3), labels = c('Young', 'Older'), name = "Group") +
+  coord_cartesian(xlim=c(0.018, 0.102), ylim=c(10, 60)) + 
+  scale_fill_manual(values = othercorcols[1], labels = 'Older', name = "Group") + 
+  scale_color_manual(values = othercorcols[1], labels = 'Older', name = "Group") + 
+  scale_linetype_manual(values = "solid", labels = 'Older', name = "Group") +
+  scale_shape_manual(values = 20, labels = 'Older', name = "Group") +
+  scale_alpha_manual(values = 0.3, labels = 'Older', name = "Group") +
   theme_classic() + 
-  theme(legend.title = element_blank(), legend.text = element_text(size = axtext), legend.key.size = unit(3,"line")) + 
+  theme(legend.position = 'none') +
   theme(axis.text = element_markdown(size = axtext),
         axis.title.x = element_markdown(size = axtitle),
         axis.title.y = element_markdown(size = axtitle)) +
-  guides(shape = guide_legend(override.aes = list(size = 2)))
-
-plot.noone.ai
-
-if (saveplots == 1) {dev.off()}
-
-# plot other - self; dotplot of learning rate vs score on SRP affective interpersonal subscale
-# line of best fit; colour indicates age (young vs old)
-
-if (saveplots == 1) {tiff("Plots/SRP_ai_vs_alpha_o-s.tiff", units="in", width = corrplotW, height = corrplotH, res = resolution)}
-
-plot.otherself.ai <- ggplot(df.full, aes(x = `other-self_alph`, y = SRP_affective_interpersonal)) + 
-  geom_point(aes(color = group, shape = group, alpha = group), size = 2, show.legend = FALSE) + 
-  geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0.3, size = 0.75, show.legend = FALSE) + 
-  geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0, size = 0.75) +
-  scale_x_continuous(name = paste0("\u03B1","<sub>other</sub> - ","\u03B1","<sub>self</sub>"), n.breaks = 4) +
-  scale_y_continuous(name = "Trait psychopathy<br>
-        <span style='font-size:14pt'>(Affective interpersonal subscale)</span>", breaks = seq(10, 60, 10)) + 
-  coord_cartesian(ylim=c(10, 60)) + 
-  scale_fill_manual(values = oscorcols, labels = c('Young', 'Older'), name = "Group") + 
-  scale_color_manual(values = oscorcols, labels = c('Young', 'Older'), name = "Group") + 
-  scale_linetype_manual(values = c("solid", "twodash"), labels = c('Young', 'Older'), name = "Group") +
-  scale_shape_manual(values = c(20,18), labels = c('Young', 'Older'), name = "Group") +
-  scale_alpha_manual(values = c(0.3,0.3), labels = c('Young', 'Older'), name = "Group") +
-  theme_classic() + 
-  theme(legend.title = element_blank(), legend.text = element_text(size = axtext), legend.key.size = unit(3,"line")) + 
-  theme(axis.text = element_markdown(size = axtext),
-        axis.title.x = element_markdown(size = axtitle),
-        axis.title.y = element_markdown(size = axtitle)) +
-  guides(shape = guide_legend(override.aes = list(size = 2)))
-
-plot.otherself.ai
+  guides(shape = guide_legend(override.aes = list(size = 2))) +
+  annotate(geom='richtext', x = 0.035, y = 10, 
+           label = paste0("_r_","<sub>s</sub>=", round(corr.young.other.ai$r[1,2],2),", _p_=", round(corr.young.other.ai$P[1,2],2)), 
+           fill = NA, label.color = NA)
+  
+  plot.other.ai.young
 
 if (saveplots == 1) {dev.off()}
 

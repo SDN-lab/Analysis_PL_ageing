@@ -410,4 +410,4 @@ output:
 
 ## Plots of correlations
 
-![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-14-1.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-14-2.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-14-3.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-14-4.png)<!-- -->
+![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-14-1.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-14-2.png)<!-- -->
