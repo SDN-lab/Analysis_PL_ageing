@@ -57,3 +57,9 @@ RL model with a combined self and other (other & no one) learning rate and one b
 
 ##### M4 = **'RWPL_SON_LR_SON_beta'**
 original model from PNAS with 3 learning rates and 3 betas - beta self, beta other, beta no one, self LR, other LR, no one LR
+
+### Developed using:
+
+MATLAB 2019b
+
+macOS 10.15 Catalina / 11.1 Big Sur
