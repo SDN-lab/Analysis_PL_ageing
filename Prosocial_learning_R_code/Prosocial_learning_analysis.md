@@ -15,11 +15,9 @@ output:
 
 ![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-2-1.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-2-2.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-2-3.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-2-4.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-2-5.png)<!-- -->
 
-
-
 ## Trial-by-trial plot
 
-![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
 
 ## Model predicting choices across conditions
 
@@ -152,8 +150,6 @@ output:
 
 
 
-
-
 ## Model of alpha
 
 <table class="table" style="margin-left: auto; margin-right: auto;">
@@ -227,7 +223,7 @@ output:
 </tbody>
 </table>
 
-## Wilcoxon signed rank test on self, other and noone parameters for each group separately
+## Between and within-group comparisons
 
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <caption>Differences between groups in learning rate for each agent</caption>
@@ -309,7 +305,7 @@ output:
 </tbody>
 </table>
 
-## Differences between young and old on psychopathy
+## Differences between young and old on psychopathic traits
 
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <caption>Differences between groups in trait measures</caption>
@@ -340,7 +336,7 @@ output:
 </tbody>
 </table>
 
-## Correlations between traits and learning parameters
+## Correlations between psychopathic traits and learning parameters
 
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <caption>Correlations between alphas and affective interpersonal</caption>
@@ -348,66 +344,414 @@ output:
   <tr>
    <th style="text-align:left;"> Group </th>
    <th style="text-align:left;"> Agent </th>
-   <th style="text-align:right;"> r </th>
-   <th style="text-align:right;"> p </th>
+   <th style="text-align:center;"> r </th>
+   <th style="text-align:center;"> p </th>
+   <th style="text-align:center;"> FDR p </th>
   </tr>
  </thead>
 <tbody>
   <tr>
    <td style="text-align:left;"> Young </td>
    <td style="text-align:left;"> Self </td>
-   <td style="text-align:right;"> -0.02 </td>
-   <td style="text-align:right;"> 0.85 </td>
+   <td style="text-align:center;"> -0.02 </td>
+   <td style="text-align:center;"> 0.85 </td>
+   <td style="text-align:center;"> 0.94 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Young </td>
    <td style="text-align:left;"> Other </td>
-   <td style="text-align:right;"> 0.21 </td>
-   <td style="text-align:right;"> 0.07 </td>
+   <td style="text-align:center;"> 0.21 </td>
+   <td style="text-align:center;"> 0.07 </td>
+   <td style="text-align:center;"> 0.22 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Young </td>
    <td style="text-align:left;"> No one </td>
-   <td style="text-align:right;"> -0.13 </td>
-   <td style="text-align:right;"> 0.27 </td>
+   <td style="text-align:center;"> -0.13 </td>
+   <td style="text-align:center;"> 0.27 </td>
+   <td style="text-align:center;"> 0.40 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Young </td>
    <td style="text-align:left;"> Other - self </td>
-   <td style="text-align:right;"> 0.11 </td>
-   <td style="text-align:right;"> 0.36 </td>
+   <td style="text-align:center;"> 0.11 </td>
+   <td style="text-align:center;"> 0.36 </td>
+   <td style="text-align:center;"> NA </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Older </td>
    <td style="text-align:left;"> Self </td>
-   <td style="text-align:right;"> 0.17 </td>
-   <td style="text-align:right;"> 0.16 </td>
+   <td style="text-align:center;"> 0.17 </td>
+   <td style="text-align:center;"> 0.16 </td>
+   <td style="text-align:center;"> 0.31 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Older </td>
    <td style="text-align:left;"> Other </td>
-   <td style="text-align:right;"> -0.33 </td>
-   <td style="text-align:right;"> 0.00 </td>
+   <td style="text-align:center;"> -0.33 </td>
+   <td style="text-align:center;"> 0.00 </td>
+   <td style="text-align:center;"> 0.03 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Older </td>
    <td style="text-align:left;"> No one </td>
-   <td style="text-align:right;"> -0.01 </td>
-   <td style="text-align:right;"> 0.94 </td>
+   <td style="text-align:center;"> -0.01 </td>
+   <td style="text-align:center;"> 0.94 </td>
+   <td style="text-align:center;"> 0.94 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Older </td>
    <td style="text-align:left;"> Other - self </td>
-   <td style="text-align:right;"> -0.25 </td>
-   <td style="text-align:right;"> 0.03 </td>
+   <td style="text-align:center;"> -0.25 </td>
+   <td style="text-align:center;"> 0.03 </td>
+   <td style="text-align:center;"> NA </td>
   </tr>
 </tbody>
 </table>
 
+
+```
+## Running nonparametric bootstrap
+## 
+## Running nonparametric bootstrap
+```
+
 ## Plots of main effects
 
-![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-13-1.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-13-2.png)<!-- -->
+![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-12-1.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-12-2.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-12-3.png)<!-- -->
 
 ## Plots of correlations
 
-![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-14-1.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-14-2.png)<!-- -->
+![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-13-1.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-13-2.png)<!-- -->
+
+## Plots of simulated alphas and performance
+
+![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
+
+## Correlations between percentage correct and learning parameters
+
+![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-15-1.png)<!-- --><table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Correlations between alphas and % correct</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Group </th>
+   <th style="text-align:left;"> Agent </th>
+   <th style="text-align:center;"> r </th>
+   <th style="text-align:center;"> p </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Young </td>
+   <td style="text-align:left;"> Self </td>
+   <td style="text-align:center;"> 0.46 </td>
+   <td style="text-align:center;"> &lt;0.001 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Young </td>
+   <td style="text-align:left;"> Other </td>
+   <td style="text-align:center;"> 0.66 </td>
+   <td style="text-align:center;"> &lt;0.001 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Young </td>
+   <td style="text-align:left;"> No one </td>
+   <td style="text-align:center;"> 0.65 </td>
+   <td style="text-align:center;"> &lt;0.001 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Older </td>
+   <td style="text-align:left;"> Self </td>
+   <td style="text-align:center;"> 0.68 </td>
+   <td style="text-align:center;"> &lt;0.001 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Older </td>
+   <td style="text-align:left;"> Other </td>
+   <td style="text-align:center;"> 0.66 </td>
+   <td style="text-align:center;"> &lt;0.001 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Older </td>
+   <td style="text-align:left;"> No one </td>
+   <td style="text-align:center;"> 0.61 </td>
+   <td style="text-align:center;"> &lt;0.001 </td>
+  </tr>
+</tbody>
+</table>
+
+
+
+## Differences between young and old on psychopathic traits excluding extreme scores
+
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Differences between groups in trait measures excluding extreme scores</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Questionnaire: </th>
+   <th style="text-align:center;"> Young mean (s.d) </th>
+   <th style="text-align:center;"> Older mean (s.d) </th>
+   <th style="text-align:center;"> Z </th>
+   <th style="text-align:center;"> p </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> SRP affective interpersonal </td>
+   <td style="text-align:center;"> 23.65 (6.95) </td>
+   <td style="text-align:center;"> 20.19 (5.64) </td>
+   <td style="text-align:center;"> -3.3 </td>
+   <td style="text-align:center;"> 0.001 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> SRP lifestyle antisocial </td>
+   <td style="text-align:center;"> 22.55 (6.21) </td>
+   <td style="text-align:center;"> 19.65 (4.25) </td>
+   <td style="text-align:center;"> -3.0 </td>
+   <td style="text-align:center;"> 0.002 </td>
+  </tr>
+</tbody>
+</table>
+
+## Correlations between psychopathic traits and learning parameters excluding extreme scores
+
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Correlations between alphas and affective interpersonal</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Group </th>
+   <th style="text-align:left;"> Agent </th>
+   <th style="text-align:center;"> r </th>
+   <th style="text-align:center;"> p </th>
+   <th style="text-align:center;"> FDR p </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Young </td>
+   <td style="text-align:left;"> Self </td>
+   <td style="text-align:center;"> -0.03 </td>
+   <td style="text-align:center;"> 0.79 </td>
+   <td style="text-align:center;"> 0.95 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Young </td>
+   <td style="text-align:left;"> Other </td>
+   <td style="text-align:center;"> 0.15 </td>
+   <td style="text-align:center;"> 0.20 </td>
+   <td style="text-align:center;"> 0.60 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Young </td>
+   <td style="text-align:left;"> No one </td>
+   <td style="text-align:center;"> -0.07 </td>
+   <td style="text-align:center;"> 0.58 </td>
+   <td style="text-align:center;"> 0.87 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Older </td>
+   <td style="text-align:left;"> Self </td>
+   <td style="text-align:center;"> 0.12 </td>
+   <td style="text-align:center;"> 0.30 </td>
+   <td style="text-align:center;"> 0.60 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Older </td>
+   <td style="text-align:left;"> Other </td>
+   <td style="text-align:center;"> -0.31 </td>
+   <td style="text-align:center;"> 0.01 </td>
+   <td style="text-align:center;"> 0.05 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Older </td>
+   <td style="text-align:left;"> No one </td>
+   <td style="text-align:center;"> 0.00 </td>
+   <td style="text-align:center;"> 0.97 </td>
+   <td style="text-align:center;"> 0.97 </td>
+  </tr>
+</tbody>
+</table>
+
+## Model of alpha controlling for IQ
+
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Robust linear mixed model for learning rates controlling for IQ</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:center;"> beta </th>
+   <th style="text-align:center;"> 2.5 % </th>
+   <th style="text-align:center;"> 97.5 % </th>
+   <th style="text-align:center;"> SE </th>
+   <th style="text-align:center;"> z </th>
+   <th style="text-align:center;"> p </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Intercept </td>
+   <td style="text-align:center;"> 0.100 </td>
+   <td style="text-align:center;"> 0.055 </td>
+   <td style="text-align:center;"> 0.145 </td>
+   <td style="text-align:center;"> 0.023 </td>
+   <td style="text-align:center;"> 4.35 </td>
+   <td style="text-align:center;"> &lt;0.001 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> General intelligence </td>
+   <td style="text-align:center;"> -0.000 </td>
+   <td style="text-align:center;"> -0.000 </td>
+   <td style="text-align:center;"> 0.000 </td>
+   <td style="text-align:center;"> 0.000 </td>
+   <td style="text-align:center;"> -0.43 </td>
+   <td style="text-align:center;"> 0.67 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Agent (other vs self) </td>
+   <td style="text-align:center;"> -0.024 </td>
+   <td style="text-align:center;"> -0.034 </td>
+   <td style="text-align:center;"> -0.014 </td>
+   <td style="text-align:center;"> 0.005 </td>
+   <td style="text-align:center;"> -4.8 </td>
+   <td style="text-align:center;"> &lt;0.001 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Agent (no one vs self) </td>
+   <td style="text-align:center;"> -0.023 </td>
+   <td style="text-align:center;"> -0.033 </td>
+   <td style="text-align:center;"> -0.013 </td>
+   <td style="text-align:center;"> 0.005 </td>
+   <td style="text-align:center;"> -4.57 </td>
+   <td style="text-align:center;"> &lt;0.001 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Group (older vs younger) </td>
+   <td style="text-align:center;"> -0.019 </td>
+   <td style="text-align:center;"> -0.028 </td>
+   <td style="text-align:center;"> -0.009 </td>
+   <td style="text-align:center;"> 0.005 </td>
+   <td style="text-align:center;"> -3.72 </td>
+   <td style="text-align:center;"> &lt;0.001 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Group * agent (other vs self) </td>
+   <td style="text-align:center;"> 0.016 </td>
+   <td style="text-align:center;"> 0.002 </td>
+   <td style="text-align:center;"> 0.030 </td>
+   <td style="text-align:center;"> 0.007 </td>
+   <td style="text-align:center;"> 2.29 </td>
+   <td style="text-align:center;"> 0.022 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Group * agent (no one vs self) </td>
+   <td style="text-align:center;"> 0.008 </td>
+   <td style="text-align:center;"> -0.006 </td>
+   <td style="text-align:center;"> 0.022 </td>
+   <td style="text-align:center;"> 0.007 </td>
+   <td style="text-align:center;"> 1.15 </td>
+   <td style="text-align:center;"> 0.25 </td>
+  </tr>
+</tbody>
+</table>
+
+## Correlations between learning parameters and neuropsychological measures
+
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Correlations between alphas and general intelligence</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Group </th>
+   <th style="text-align:left;"> Agent </th>
+   <th style="text-align:center;"> r </th>
+   <th style="text-align:center;"> p </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Young </td>
+   <td style="text-align:left;"> Self </td>
+   <td style="text-align:center;"> 0.13 </td>
+   <td style="text-align:center;"> 0.25 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Young </td>
+   <td style="text-align:left;"> Other </td>
+   <td style="text-align:center;"> -0.20 </td>
+   <td style="text-align:center;"> 0.08 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Young </td>
+   <td style="text-align:left;"> No one </td>
+   <td style="text-align:center;"> -0.09 </td>
+   <td style="text-align:center;"> 0.42 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Older </td>
+   <td style="text-align:left;"> Self </td>
+   <td style="text-align:center;"> -0.08 </td>
+   <td style="text-align:center;"> 0.52 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Older </td>
+   <td style="text-align:left;"> Other </td>
+   <td style="text-align:center;"> 0.08 </td>
+   <td style="text-align:center;"> 0.52 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Older </td>
+   <td style="text-align:left;"> No one </td>
+   <td style="text-align:center;"> 0.15 </td>
+   <td style="text-align:center;"> 0.19 </td>
+  </tr>
+</tbody>
+</table>
+
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Correlations between alphas and ACE subscales</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Subscale </th>
+   <th style="text-align:left;"> Agent </th>
+   <th style="text-align:center;"> r </th>
+   <th style="text-align:center;"> p </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Memory </td>
+   <td style="text-align:left;"> Self </td>
+   <td style="text-align:center;"> -0.03 </td>
+   <td style="text-align:center;"> 0.77 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Memory </td>
+   <td style="text-align:left;"> Other </td>
+   <td style="text-align:center;"> 0.00 </td>
+   <td style="text-align:center;"> 0.99 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Memory </td>
+   <td style="text-align:left;"> No one </td>
+   <td style="text-align:center;"> 0.12 </td>
+   <td style="text-align:center;"> 0.29 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Attention </td>
+   <td style="text-align:left;"> Self </td>
+   <td style="text-align:center;"> 0.09 </td>
+   <td style="text-align:center;"> 0.47 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Attention </td>
+   <td style="text-align:left;"> Other </td>
+   <td style="text-align:center;"> -0.04 </td>
+   <td style="text-align:center;"> 0.71 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Attention </td>
+   <td style="text-align:left;"> No one </td>
+   <td style="text-align:center;"> 0.20 </td>
+   <td style="text-align:center;"> 0.08 </td>
+  </tr>
+</tbody>
+</table>

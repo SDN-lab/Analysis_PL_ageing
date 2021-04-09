@@ -9,15 +9,34 @@ output:
 
 ```{r setup, include=FALSE}
 
-## Set up and functions
-
-knitr::opts_chunk$set(echo = TRUE)
-options(digits = 2)
-
-# load required packages and functions
+# Load required packages
 
 require(pacman)
-pacman::p_load(tidyverse, readxl, sjstats, effects, lme4, lmerTest, MASS, car, gridExtra, DataExplorer, broom, pander, scales, robustlmm, emmeans, Hmisc, psych, kableExtra, plyr, ggpubr, fitdistrplus, tidyr, stringi, robust, ggsignif, ppcor, ggtext, rstatix, coin, ggpubr)
+pacman::p_load(boot, # for bootstrapping
+               ggpubr, # extra plot functions
+               ggsignif, # significance for plots
+               ggtext, # text formatting for plots
+               grDevices, # saving plots
+               grid, # plot dimensions
+               Hmisc, # for rcorr correlations
+               kableExtra, # table formatting
+               knitr, # knit functions
+               lme4, # mixed models
+               MASS, # robust linear models
+               parameters, # extract model parameters
+               plyr, # data processing functions
+               ppcor, # for pcor.test
+               psych, # stats functions
+               readxl, # read excel files
+               robustlmm, # robust mixed models
+               rstatix, # for wilcox effect sizes
+               stats, # stats functions
+               tidyverse) # ggplot, dplyr packages
+
+## Set up and functions
+
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
+options(digits = 2)
 
 ### Function to produce reporting stats for rlmer objects
 
@@ -50,47 +69,6 @@ stats.rlmerMod <- function(object, level = 0.95) {
                 se,
                 z,
                 2*pnorm(-abs(z)))
-  
-  
-  # label column names
-  colnames(ctab) <- c('beta',
-                      paste(100 * ((1 - level) / 2), '%'),
-                      paste(100 * ((1 + level) / 2), '%'),
-                      'SE',
-                      'z',
-                      'p')
-  
-  # Output
-  return(ctab)
-  
-}
-
-stats.rlmMod <- function(object, level = 0.95) {
-  # Extract beta coefficients
-  beta <- object$coefficients
-  
-  # Extract names of coefficients
-  parm <- names(beta)
-  
-  # Extract standard errors for the coefficients
-  se <- sqrt(diag(vcov(object)))
-  
-  # Set level of confidence interval
-  conf.level <- qnorm((1 + level) / 2)
-  
-  # Calculate z value
-  z = beta/se
-  
-  # Calculate v value
-  p <- 2*pnorm(-abs(z))
-  
-  # Calculate CI and create table
-  ctab <- cbind(beta,
-                beta - (conf.level * se), 
-                beta + (conf.level * se),
-                se,
-                z,
-                p)
   
   
   # label column names
@@ -172,49 +150,6 @@ stats.rlmerMod.f <- function(object, level = 0.95) {
   
 }
 
-### Functions to format tables from rlm (instead of rlmer) objects adapted from stats.rlmerMod.f above by Jo Cutler 25/02/20
-
-stats.rlmMod.f <- function(object, level = 0.95) {
-  # Extract beta coefficients
-  beta <- object$coefficients
-  
-  # Extract names of coefficients
-  parm <- names(beta)
-  
-  # Extract standard errors for the coefficients
-  se <- sqrt(diag(vcov(object)))
-  
-  # Set level of confidence interval
-  conf.level <- qnorm((1 + level) / 2)
-  
-  # Calculate z value
-  z = beta/se
-  
-  # Calculate v value
-  p <- 2*pnorm(-abs(z))
-  
-  # Calculate CI and create table
-  ctab <- cbind(sprintf("%.3f", signif(beta,2)),
-                sprintf("%.3f", signif(beta - (conf.level * se))), 
-                sprintf("%.3f", signif(beta + (conf.level * se))),
-                sprintf("%.3f", signif(se,2)),
-                round(z,2),
-                pvalr(p))
-  
-  
-  # label column names
-  colnames(ctab) <- c('beta',
-                      paste(100 * ((1 - level) / 2), '%'),
-                      paste(100 * ((1 + level) / 2), '%'),
-                      'SE',
-                      'z',
-                      'p')
-  
-  # Output
-  return(ctab)
-  
-}
-
 ```
 
 ```{r echo=FALSE}
@@ -229,6 +164,8 @@ resolution <- 1200
 plotH <- 4
 axtext <- 18
 axtitle <- 20
+
+set.seed(123)
 
 ```
 
@@ -392,35 +329,6 @@ if (saveplots == 1) {dev.off()}
 
 ```
 
-```{r echo=FALSE, eval=FALSE}
-
-## Compare model fit between groups
-
-# loads data
-group.fit <- read_xlsx("Compare_fit_between_groups.xlsx", sheet = 1, col_names = T) 
-group.fit <- group.fit %>%
-  mutate(group = factor(group, 
-                        levels = c(1,2), 
-                        labels = c("young", "old"))) 
-
-hist(group.fit$fit)
-describe(group.fit$fit)
-
-group.fit.av <- group.fit %>%
-  dplyr::group_by(group) %>%
-  dplyr::summarise(n = n(), mean = mean(fit,na.rm=T), median = median(fit,na.rm=T), sd = sd(fit,na.rm=T), se = sd/sqrt(n))
-
-wil.group.fit <- wilcox.test(
-  group.fit$fit[group.fit$group == "young"],
-  group.fit$fit[group.fit$group == "old"],
-  paired = FALSE)
-
-Zstat.group.fit  <- qnorm(wil.group.fit$p.value/2)
-
-fit.es <- group.fit %>% wilcox_effsize(fit ~ group, ci = TRUE)
-
-```
-
 ## Trial-by-trial plot
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, results='hide', fig.keep='last'}
@@ -550,6 +458,8 @@ grid::grid.ls(grid::grid.force())
 grid::grid.gedit("key-[-0-9]-[1-9]", size = unit(0.2, "in"))
 plot.tbt <- grid::grid.grab()
 
+print(plot.tbt)
+
 if (saveplots == 1) {
   plot.tbt
   dev.off()}
@@ -558,7 +468,7 @@ if (saveplots == 1) {
 
 ## Model predicting choices across conditions
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 df.tbt.c <- subset(df.tbt.c, ID != 216) # remove outliers
 df.tbt.c <- subset(df.tbt.c, ID != 253)
@@ -594,8 +504,8 @@ df.full <- df.full %>%
 
 # rename columns to use in creating long format (self: agent1, other: agent2, no one: agent3)
 
-df.full <- rename(df.full, c("PL_self_alpha"="agent1-alpha", "PL_other_alpha"="agent2-alpha", "PL_noone_alpha"="agent3-alpha"))
-df.full <- rename(df.full, c("PL_self_corr"="agent1-corr", "PL_other_corr"="agent2-corr", "PL_noone_corr"="agent3-corr"))
+df.full <- plyr::rename(df.full, c("PL_self_alpha"="agent1-alpha", "PL_other_alpha"="agent2-alpha", "PL_noone_alpha"="agent3-alpha"))
+df.full <- plyr::rename(df.full, c("PL_self_corr"="agent1-corr", "PL_other_corr"="agent2-corr", "PL_noone_corr"="agent3-corr"))
 
 # make performance a percentage (0-100) instead of a proportion (0-1)
 
@@ -633,12 +543,12 @@ df.l <- df.full                                                             %>%
 
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE}
 
 ## Demographics
 
 demographics <- df.full %>%
-  dplyr::select(contains("Group", ignore.case = F), matches("Age", ignore.case = F), contains("Education_years"), matches("Gender", ignore.case = F)) %>%
+  dplyr::select(contains("Group", ignore.case = F), matches("Age", ignore.case = F), contains("Education_years"), matches("Gender", ignore.case = F), matches("WTAR_Standard")) %>%
   dplyr::group_by(Group) 
 
 d.mean <- demographics %>%
@@ -653,46 +563,31 @@ d.n <- demographics %>%
   dplyr::summarise(n = n())
 d.gender <- as.data.frame.matrix(table(demographics$Group, demographics$Gender))
 
-d <- bind_cols(d.mean, d.min[2:3], d.max[2:3], d.sd[2:3], d.n[2], d.gender)
+d <- bind_cols(d.mean, d.min[2:4], d.max[2:4], d.sd[2:4], d.n[2], d.gender)
 
 diff.gender <- chisq.test(d.gender)
+
 diff.education <- wilcox.test(
   df.full$Education_years[df.full$group == "young"],
   df.full$Education_years[df.full$group == "old"],
   paired = FALSE)
-
 Z.stat.education <- qnorm(diff.education$p.value/2)
-
 diff.education.es <- df.full %>% wilcox_effsize(Education_years ~ group, ci = TRUE)
 
-```
-
-```{r echo=FALSE, eval=FALSE}
-
-## Plot histograms and check skew & kurtosis
-
-hist(df.full$`agent1-alpha`)
-hist(df.full$`agent2-alpha`)
-hist(df.full$`agent3-alpha`)
-hist(df.full$PL_beta)
-hist(df.full$SRP_affective_interpersonal)
-hist(df.full$SRP_lifestyle_antisocial)
-hist(df.full$Education_years)
-
-describe(df.full$`agent1-alpha`) # skew > 1.4, kurtosis > 1.75 **
-describe(df.full$`agent2-alpha`) # skew = 0, kurtosis < .1 (use robust to match other alphas)
-describe(df.full$`agent3-alpha`) # skew > 1.6, kurtosis > 3.85 **
-describe(df.full$PL_beta) # skew > 1.8, kurtosis > 2.8 **
-describe(df.full$SRP_affective_interpersonal) # skew > 1.77, kurtosis > 4.07 **
-describe(df.full$SRP_lifestyle_antisocial) # skew > 1.61, kurtosis > 3.11 **
+# diff.WTAR <- wilcox.test(
+#   df.full$WTAR_Standard[df.full$group == "young"],
+#   df.full$WTAR_Standard[df.full$group == "old"],
+#   paired = FALSE)
+# Z.stat.WTAR <- qnorm(diff.WTAR$p.value/2)
+# diff.WTAR.es <- df.full %>% wilcox_effsize(WTAR_Standard ~ group, ci = TRUE)
 
 ```
 
 ## Model of alpha
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-## Use robust linear mixed effects models to analyse the data due to heavily skewed distribution
+## Use robust linear mixed effects models to analyse the learning rates
 
 rlmermodel <- rlmer(alpha ~ agent*group + (1|ID), data = df.l)
 
@@ -709,7 +604,7 @@ kable(alphastats,
 
 ```
 
-## Wilcoxon signed rank test on self, other and noone parameters for each group separately
+## Between and within-group comparisons
 
 ```{r echo=FALSE}
 
@@ -802,8 +697,7 @@ Zstat.self[v]  <- qnorm(wil.self$p.value/2)
 Zstat.other[v] <- qnorm(wil.other$p.value/2)
 Zstat.noone[v] <- qnorm(wil.noone$p.value/2)
 
-
-# 
+# associate * with significant p values to add to plot
 
 if (wil.self$p.value < .05) { ph.sig[v,1] <- "*" 
 } else if (wil.self$p.value >= .05) { ph.sig[v,1] <- NA } 
@@ -903,32 +797,31 @@ wil.beta.es <- df.full %>% wilcox_effsize(PL_beta ~ group, ci = TRUE)
 
 ```
 
-## Differences between young and old on psychopathy
+## Differences between young and old on psychopathic traits
 
 ```{r echo=FALSE}
+
+# SRP affective interpersonal, young vs older
 
 df.full.srp <- df.full %>% drop_na("agent1-alpha") %>% 
   drop_na("SRP_affective_interpersonal")
 
-# SRP affective interpersonal, young vs older
 diff.srp.ai <- wilcox.test(
   df.full.srp$SRP_affective_interpersonal[df.full.srp$group == "young"],
   df.full.srp$SRP_affective_interpersonal[df.full.srp$group == "old"],
   paired = FALSE)
 
-if (diff.srp.ai$p.value < .05) { ph.sig.ai <- "*" 
-} else if (diff.srp.ai$p.value >= .05) { ph.sig.ai <- NA } 
-
 wil.srp.ai.es <- df.full.srp %>% wilcox_effsize(SRP_affective_interpersonal ~ group, ci = TRUE)
 
 # SRP lifestyle antisocial, young vs older
+
+df.full.srp <- df.full %>% drop_na("agent1-alpha") %>% 
+  drop_na("SRP_lifestyle_antisocial")
+
 diff.srp.la <- wilcox.test(
   df.full.srp$SRP_lifestyle_antisocial[df.full.srp$group == "young"],
   df.full.srp$SRP_lifestyle_antisocial[df.full.srp$group == "old"],
   paired = FALSE)
-
-if (diff.srp.la$p.value < .05) { ph.sig.la <- "*" 
-} else if (diff.srp.la$p.value >= .05) { ph.sig.la <- NA } 
 
 wil.srp.la.es <- df.full.srp %>% wilcox_effsize(SRP_lifestyle_antisocial ~ group, ci = TRUE)
 
@@ -965,7 +858,7 @@ kable(id.diff.table,
 
 ```
 
-## Correlations between traits and learning parameters
+## Correlations between psychopathic traits and learning parameters
 
 ```{r echo=FALSE}
 
@@ -1034,8 +927,12 @@ corr.table.ai <- tibble(
         corr.old.otherself.ai$P[1,2])
 )
 
-kable(corr.table.ai, caption = 
-        "Correlations between alphas and affective interpersonal" ) %>%
+corr.table.ai$`FDR p` <- NA
+corr.table.ai$`FDR p`[c(1:3,5:7)] <- p.adjust(corr.table.ai$p[c(1:3,5:7)], method = "fdr")
+
+kable(corr.table.ai,
+      align = c(rep('l',2), rep('c',3)),
+      caption = "Correlations between alphas and affective interpersonal" ) %>%
   kable_styling() 
 
 # confidence intervals
@@ -1080,8 +977,6 @@ corr.old.otherself.ai.ci <-
             df.full$SRP_affective_interpersonal[df.full$Group == 2],
             method = "spearman")
 
-
-
 # partial correlations
 
 df.full.pcorr <- df.full %>% tidyr::drop_na("agent2-alpha", "SRP_affective_interpersonal", "PL_beta")
@@ -1113,6 +1008,53 @@ r.other.ai <- paired.r(corr.young.other.ai$r[1,2], corr.old.other.ai$r[1,2], n =
 r.otherself.ai <- paired.r(corr.young.otherself.ai$r[1,2], corr.old.otherself.ai$r[1,2], n = 74, n2 = 74)
 pr.other.ai <- paired.r(pcorr.young.other.ai$estimate, pcorr.old.other.ai$estimate, n = 74, n2 = 74)
 pr.otherself.ai <- paired.r(pcorr.young.os.ai$estimate, pcorr.old.os.ai$estimate, n = 74, n2 = 74)
+
+```
+
+```{r echo=FALSE, warning=FALSE}
+
+## Mediation of age effects by psychopathic traits
+
+df.med <- df.full %>% drop_na(c("group", "SRP_affective_interpersonal", "agent2-alpha"))
+
+## first check that trait is predicted by age group - required for mediation
+
+fit.mediator=rlm(SRP_affective_interpersonal ~ group, df.med)
+m.mediator <- model_parameters(fit.mediator, standardize = "refit")
+# print(summary(fit.mediator))
+
+fit.totaleffect <- rlm(`other-self_alph` ~ group, df.med)
+m.totaleffect <- model_parameters(fit.totaleffect, standardize = "refit")
+# print(summary(fit.totaleffect))
+
+fit.dv=rlm(`other-self_alph` ~ group + SRP_affective_interpersonal, df.med)
+m.dv <- model_parameters(fit.dv, standardize = "refit")
+# print(summary(fit.dv))
+
+fit.dv.mod=rlm(`other-self_alph` ~ group*SRP_affective_interpersonal, df.med)
+m.dv.mod <- model_parameters(fit.dv.mod, standardize = "refit")
+# print(summary(fit.dv.mod))
+
+# d is ACME
+# z is ADE
+# tau is total effect
+# n is prop. mediated
+
+set.seed(321) # make it reproducible
+
+med.results = mediation::mediate(fit.mediator, fit.dv, treat="group", mediator="SRP_affective_interpersonal", boot = T, sims = 10000)
+#print(summary(med.results))
+
+set.seed(321)
+
+med.results.mod = mediation::mediate(fit.mediator, fit.dv.mod, treat="group", mediator="SRP_affective_interpersonal", boot = T, sims = 10000)
+#print(summary(med.results.mod))
+
+fit.old <- rlm(`other-self_alph` ~ SRP_affective_interpersonal, df.med[df.med$group == "old",])
+m.old <- model_parameters(fit.old, standardize = "refit")
+
+fit.young <- rlm(`other-self_alph` ~ SRP_affective_interpersonal, df.med[df.med$group == "young",])
+m.young <- model_parameters(fit.young, standardize = "refit")
 
 ```
 
@@ -1163,11 +1105,24 @@ for (v in 1) {
     dplyr::group_by(agent, group, condition) %>%
     dplyr::summarise(n = n(), median = median(get(i),na.rm=T), sd = sd(get(i),na.rm=T), se = sd/sqrt(n))
   
-  plt <- ggplot(plt.data, aes(x=agent, y=median, group = condition, fill = condition, color = condition, alpha = condition)) +
+  plt.data$original <- 0
+  plt.bootBias <- 0
+  plt.bootSE <- 0
+  plt.bootMed <- 0
+  
+  for (c in plt.data$condition) {
+    med.boot = boot(df.l$alpha[df.l$condition == c], function(x,i) median(x[i]), R=1000)
+    med.boot <- summary(med.boot)
+    for (col in colnames(med.boot)[2:ncol(med.boot)])
+      plt.data[plt.data$condition == c, col] <- med.boot[1, col]
+  }
+  
+  
+  plt <- ggplot(plt.data, aes(x=agent, y=bootMed, group = condition, fill = condition, color = condition, alpha = condition)) +
     geom_bar(stat= "identity", position=position_dodge(0.75), width = 0.75, size = 0.4, color = 'black') +
     geom_jitter(data = df.l, aes(x = agent, y = get(i), group = condition, color = condition), position = position_jitterdodge(dodge.width = 0.75, jitter.height = 0, jitter.width = 0.05), size = 2, alpha = 0.3, show.legend = FALSE) +
     geom_bar(stat= "identity", position=position_dodge(0.75), width = 0.75, size = 0.4, alpha = 0, color = 'black') +
-    geom_errorbar(aes(ymin = median-se, ymax = median+se), position=position_dodge(.75), color = 'black', width = 0, alpha = 1) +
+    geom_errorbar(aes(ymin = bootMed-bootSE, ymax = bootMed+bootSE), position=position_dodge(.75), color = 'black', width = 0, alpha = 1) +
     scale_x_discrete(labels = c('Self', 'Other', 'No one')) + 
     scale_y_continuous(limits = lims, expan = expand_scale(mult = c(0, .1))) +
     labs(x= NULL,
@@ -1232,16 +1187,28 @@ lims <- c(NA, NA)
 graphname <- paste0('Plots/',n,'_by_group_wsig.tiff')
 if (saveplots == 1) {tiff(graphname, units="in", width=osplotW, height=plotH, res=resolution)}
 
-## Organise data to get standard errors
+# Organise data to get standard errors
 plt.data <- df.full %>%
   dplyr::group_by(group) %>%
   dplyr::summarise(n = n(), median = median(`other-self_alph`,na.rm=T), sd = sd(`other-self_alph`,na.rm=T), se = sd/sqrt(n))
 
-plt <- ggplot(plt.data, aes(x=group, y=median, alpha = group)) +
+plt.data$original <- 0
+plt.bootBias <- 0
+plt.bootSE <- 0
+plt.bootMed <- 0
+
+for (g in plt.data$group) {
+  med.boot = boot(df.full$`other-self_alph`[df.full$group == g], function(x,i) median(x[i]), R=1000)
+  med.boot <- summary(med.boot)
+  for (col in colnames(med.boot)[2:ncol(med.boot)])
+    plt.data[plt.data$group == g, col] <- med.boot[1, col]
+}
+
+plt <- ggplot(plt.data, aes(x=group, y=bootMed, alpha = group)) +
   geom_bar(stat= "identity", width = 0.5, size = 0.4, color = 'black', fill = bar1col) +
   geom_jitter(data = df.full, aes(x = group, y = `other-self_alph`, color = group), position = position_jitterdodge(dodge.width = 0.5, jitter.height = 0, jitter.width = 0.05), size = 2, alpha = 0.3) +
   geom_bar(stat= "identity", width = 0.5, size = 0.4, alpha = 0, color = 'black') +
-  geom_errorbar(aes(ymin = median-se, ymax = median+se), position=position_dodge(0), color = 'black', width = 0, alpha = 1) +
+  geom_errorbar(aes(ymin = bootMed-bootSE, ymax = bootMed+bootSE), position=position_dodge(0), color = 'black', width = 0, alpha = 1) +
   scale_x_discrete(labels = c('Young', 'Older')) + 
   scale_y_continuous(limits = lims, expand = expand_scale(mult = c(0, .12))) +
   labs(x= NULL,
@@ -1254,11 +1221,11 @@ plt <- ggplot(plt.data, aes(x=group, y=median, alpha = group)) +
   theme(axis.text.x=element_text(size = axtitle, hjust = c(0.7,0.3), colour = "black"), 
         axis.text.y=element_text(size = axtext), 
         axis.title.y=element_markdown(size = axtitle)) +
-  theme(legend.position = 'none') #+ 
-#annotation_custom(grob = textGrob("more self-bias", x=-0.5,  y=0.2, rot = 90,
-#  gp=gpar(fontsize=14, fontface="italic"))) +
-#annotation_custom(grob = textGrob("more prosocial", x=-0.5,  y=0.8, rot = 90,
-#  gp=gpar(fontsize=14, fontface="italic")))
+  theme(legend.position = 'none') + 
+  annotation_custom(grob = textGrob("more self-bias", x=-0.5,  y=0.2, rot = 90,
+                                    gp=gpar(fontsize=14, fontface="italic"))) +
+  annotation_custom(grob = textGrob("more prosocial", x=-0.5,  y=0.8, rot = 90,
+                                    gp=gpar(fontsize=14, fontface="italic")))
 
 r <- 3 * (max(ggplot_build(plt)$data[[1]]$x) / ((max(ggplot_build(plt)$data[[2]]$y, na.rm = T)) + (-1*(min(ggplot_build(plt)$data[[2]]$y, na.rm = T))))) 
 plt <- plt + coord_fixed(ratio = r, expand = T, clip = 'off') 
@@ -1278,6 +1245,64 @@ if (ph.sig.a == "*") {
 
 print(plt) # no legend, with significance
 if (saveplots == 1) {dev.off()}
+
+# Bar plots of beta
+
+## Organise data to get standard errors
+plt.data <- df.full %>%
+  dplyr::group_by(group) %>%
+  dplyr::summarise(n = n(), mean = median(PL_beta,na.rm=T), sd = sd(PL_beta,na.rm=T), se = sd/sqrt(n))
+
+plt.data$original <- 0
+plt.bootBias <- 0
+plt.bootSE <- 0
+plt.bootMed <- 0
+
+for (g in plt.data$group) {
+  med.boot = boot(df.full$PL_beta[df.full$group == g], function(x,i) median(x[i]), R=1000)
+  med.boot <- summary(med.boot)
+  for (col in colnames(med.boot)[2:ncol(med.boot)])
+    plt.data[plt.data$group == g, col] <- med.boot[1, col]
+}
+
+graphname <- paste0('Plots/beta_by_group_wsig.jpeg')
+if (saveplots == 1) {tiff(graphname, units="in", width=osplotW, height=plotH, res=resolution)}
+
+plt <- ggplot(plt.data, aes(x=group, y=bootMed, alpha = group)) +
+  geom_bar(stat= "identity", width = 0.5, size = 0.4, color = 'black', fill = bar1col) +
+  geom_jitter(data = df.full, aes(x = group, y = PL_beta, color = group), position = position_jitterdodge(dodge.width = 0.5, jitter.height = 0, jitter.width = 0.05), size = 2, alpha = 0.3) +
+  geom_bar(stat= "identity", width = 0.5, size = 0.4, alpha = 0, color = 'black') +
+  geom_errorbar(aes(ymin = bootMed-bootSE, ymax = bootMed+bootSE), position=position_dodge(0), color = 'black', width = 0, alpha = 1) +
+  scale_x_discrete(name = '',labels = c('Young', 'Older')) + 
+  scale_y_continuous(name = 'Temperature parameter (\u03B2)', breaks = c(0.2,0.4,0.6,0.8,1,1.2), expand = expand_scale(mult = c(0, .1))) +
+  scale_fill_manual(values = bar1col, labels = c('Young', 'Older')) +
+  scale_color_manual(values = inddata1cols, labels = c('Young', 'Older')) +
+  scale_alpha_manual(values = c(1, 0.33), labels = c('Young', 'Older')) +
+  theme_classic() +
+  theme(legend.title = element_blank()) + 
+  theme(axis.text.y=element_text(size = axtext), 
+        axis.text.x=element_text(size = axtitle, hjust = c(0.7,0.3), colour = 'black'),
+        axis.title.y=element_markdown(size = axtitle)) +
+  theme(legend.position = 'none')
+
+r <- 3* (max(ggplot_build(plt)$data[[1]]$x) / max(ggplot_build(plt)$data[[2]]$y, na.rm = T))
+plt <- plt + coord_fixed(ratio = r, expand = T)
+
+# print(plt) # no legend, no significance
+
+if (ph.sig.b == "*") {
+  linespace <- c(max(ggplot_build(plt)$data[[1]]$y, na.rm = T), max(ggplot_build(plt)$data[[2]]$y, na.rm = T))
+  increments <- (linespace[2] - linespace[1]) / 2
+  ypos <- linespace[1] + increments
+  xpoints <- rev(ggplot_build(plt)$data[[1]]$x[1:2])
+  
+  plt <- plt +
+    geom_signif(annotation = ph.sig.b, y_position = ypos, xmin = xpoints[1], xmax = xpoints[2], tip_length = 0, color = 'black', alpha = 1)
+  
+  print(plt)
+  
+  if (saveplots == 1) {dev.off()}
+} 
 
 ```
 
@@ -1302,7 +1327,7 @@ plot.other.ai.old <- ggplot(df.full.older, aes(x = `agent2-alpha`, y = SRP_affec
   geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0.3, size = 0.75, show.legend = FALSE) + 
   geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0, size = 2) +
   scale_x_continuous(name = paste0("\u03B1","<sub>other</sub>"," (Older)"), breaks = c(0.02, 0.04, 0.06, 0.08, 0.1), labels = c('0.02', '0.04', '0.06', '0.08', '0.10')) +
-  scale_y_continuous(name = "Trait psychopathy<br>
+  scale_y_continuous(name = "Psychopathic traits<br>
         <span style='font-size:14pt'>(Affective interpersonal subscale)</span>", breaks = seq(10, 60, 10)) + 
   coord_cartesian(xlim=c(0.018, 0.102), ylim=c(10, 60)) + 
   scale_fill_manual(values = othercorcols[2], labels = 'Older', name = "Group") + 
@@ -1333,7 +1358,7 @@ plot.other.ai.young <- ggplot(df.full.young, aes(x = `agent2-alpha`, y = SRP_aff
   geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0.3, size = 0.75, show.legend = FALSE) + 
   geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0, size = 2) +
   scale_x_continuous(name = paste0("\u03B1","<sub>other</sub>"," (Younger)"), breaks = c(0.02, 0.04, 0.06, 0.08, 0.1), labels = c('0.02', '0.04', '0.06', '0.08', '0.10')) +
-  scale_y_continuous(name = "Trait psychopathy<br>
+  scale_y_continuous(name = "Psychopathic traits<br>
         <span style='font-size:14pt'>(Affective interpersonal subscale)</span>", breaks = seq(10, 60, 10)) + 
   coord_cartesian(xlim=c(0.018, 0.102), ylim=c(10, 60)) + 
   scale_fill_manual(values = othercorcols[1], labels = 'Older', name = "Group") + 
@@ -1355,4 +1380,533 @@ plot.other.ai.young <- ggplot(df.full.young, aes(x = `agent2-alpha`, y = SRP_aff
 
 if (saveplots == 1) {dev.off()}
   
+```
+
+## Plots of simulated alphas and performance
+
+```{r}
+
+df.opt <- read_xlsx("Optimal_alpha.xlsx", sheet = 1, col_names = T)
+
+df.opt$Choices = df.opt$Choices * 100
+df.opt$Constant <- 1
+opt.labels <- c("Simulated data", "Participant range")
+df.opt$Constant <- factor(df.opt$Constant, levels = c(1, 2), labels = opt.labels)
+
+df.full.opt <- df.l %>% select("alpha", "corr")
+colnames(df.full.opt) <- c("Alpha", "Choices")
+
+line <- glm(Choices ~ poly(Alpha,2), data = df.opt)
+line.coord <- as.data.frame(approx(x=df.opt$Alpha, y = fitted(line), xout=seq(min(df.opt$Alpha), max(df.opt$Alpha), length = 10000)))
+optimal <- line.coord$x[line.coord$y == max(line.coord$y)]
+
+if (saveplots == 1) {tiff("Plots/Correct_vs_alpha_sim.tiff", units="in", width = modplotW*0.8, height = plotH, res = resolution)}
+
+plot.alpha.corr.sim <- ggplot(df.opt, aes(x = Alpha, y = Choices)) + 
+  geom_point(aes(colour = Constant, alpha = Constant, shape = Constant), size = 2) +  
+  geom_smooth(method = 'lm', alpha = 0.3, size = 0.75, formula = y ~ poly(x, 2), colour = 'black') +
+  scale_x_continuous(name = paste0("\u03B1"), n.breaks = 5) +
+  scale_y_continuous(name = "Percentage correct") + 
+  scale_colour_manual(values = c('#365F91', 'grey'), limits = opt.labels) +
+  scale_alpha_manual(values = c(0.03), guide = 'none') +
+  scale_shape_manual(values = c(19,15), limits = opt.labels) +
+  theme_classic() + 
+  theme(legend.title = element_blank(), 
+        legend.text = element_text(size = axtext-2), 
+        legend.key.size = unit(1.5,"line"), 
+        legend.position = c(0.65, 0.2), 
+        legend.background = element_blank()) + 
+  theme(axis.text = element_markdown(size = axtext),
+        axis.title.x = element_markdown(size = axtitle),
+        axis.title.y = element_markdown(size = axtitle)) +
+  guides(shape = guide_legend(override.aes = list(size = 4))) +
+  annotate("rect", xmin = min(df.l$alpha), xmax = max(df.l$alpha), ymin = min(df.l$corr), ymax = max(df.l$corr), alpha = 0.3)
+
+plot.alpha.corr.sim
+
+if (saveplots == 1) {dev.off()}
+
+```
+
+## Correlations between percentage correct and learning parameters
+
+```{r}
+
+df.full$alpha_av <- rowMeans(df.full[,c("agent1-alpha", "agent2-alpha", "agent3-alpha")], na.rm = TRUE)
+df.full$corr_av <- rowMeans(df.full[,c("agent1-corr", "agent2-corr", "agent3-corr")], na.rm = TRUE)
+
+corr.r <- rcorr(df.full$alpha_av,
+        df.full$corr_av,
+        type = "spearman")
+
+corr.r.ci <- 
+  corr.test(df.full$alpha_av,
+            df.full$corr_av,
+            method = "spearman")
+
+corr.young.r <- 
+  rcorr(df.full$alpha_av[df.full$Group == 1],
+        df.full$corr_av[df.full$Group == 1],
+        type = "spearman")
+
+corr.old.r <- 
+  rcorr(df.full$alpha_av[df.full$Group == 2],
+        df.full$corr_av[df.full$Group == 2],
+        type = "spearman")
+
+r.r <- paired.r(corr.young.r$r[1,2], corr.old.r$r[1,2], n = 72, n2 = 75)
+
+corr.young.self.r <- 
+  rcorr(df.full$`agent1-alpha`[df.full$Group == 1],
+        df.full$`agent1-corr`[df.full$Group == 1],
+        type = "spearman")
+
+corr.young.other.r <- 
+  rcorr(df.full$`agent2-alpha`[df.full$Group == 1],
+        df.full$`agent2-corr`[df.full$Group == 1],
+        type = "spearman")
+
+corr.young.noone.r <- 
+  rcorr(df.full$`agent3-alpha`[df.full$Group == 1],
+        df.full$`agent3-corr`[df.full$Group == 1],
+        type = "spearman")
+
+corr.old.self.r <- 
+  rcorr(df.full$`agent1-alpha`[df.full$Group == 2],
+        df.full$`agent1-corr`[df.full$Group == 2],
+        type = "spearman")
+
+corr.old.other.r <- 
+  rcorr(df.full$`agent2-alpha`[df.full$Group == 2],
+        df.full$`agent2-corr`[df.full$Group == 2],
+        type = "spearman")
+
+corr.old.noone.r <- 
+  rcorr(df.full$`agent3-alpha`[df.full$Group == 2],
+        df.full$`agent3-corr`[df.full$Group == 2],
+        type = "spearman")
+
+selfcorcols <- c('#365F91', '#6EB3E4')
+othercorcols <- c('#3C859A', '#009E99')
+noonecorcols <- c('#60487A', '#7D30A0')
+oscorcols <- othercorcols
+
+corrplotH <- plotH
+corrplotW <- plotH * 1.625
+
+## Plots of alpha with percentage correct
+
+if (saveplots == 1) {tiff("Plots/Correct_vs_alpha.tiff", units="in", width = modplotW*0.8, height = plotH, res = resolution)}
+
+plot.alpha.corr <- ggplot(df.l, aes(x = alpha, y = corr)) + 
+  geom_point(colour = selfcorcols[1], size = 2, alpha = 0.3, show.legend = FALSE) + 
+  geom_smooth(colour = selfcorcols[1], method = 'lm', alpha = 0.3, size = 0.75, formula = y ~ x, show.legend = FALSE) + 
+  scale_x_continuous(name = paste0("\u03B1")) + #, n.breaks = 7) +
+  scale_y_continuous(name = "Percentage correct") +
+  coord_cartesian(ylim=c(0, 100)) + 
+  theme_classic() + 
+  theme(legend.title = element_blank(), legend.text = element_text(size = axtext), legend.key.size = unit(3,"line")) + 
+  theme(axis.text = element_markdown(size = axtext),
+        axis.title.x = element_markdown(size = axtitle),
+        axis.title.y = element_markdown(size = axtitle)) +
+  guides(shape = guide_legend(override.aes = list(size = 2)))
+
+plot.alpha.corr
+
+if (saveplots == 1) {dev.off()}
+
+# table of these correlations 
+
+corr.table.r <- tibble(
+  Group = c("Young", "Young", "Young", "Older", "Older", "Older"),
+  Agent = rep(c("Self", "Other", "No one"), 2),
+  r = c(corr.young.self.r$r[1,2],
+        corr.young.other.r$r[1,2],
+        corr.young.noone.r$r[1,2],        
+        corr.old.self.r$r[1,2],
+        corr.old.other.r$r[1,2],
+        corr.old.noone.r$r[1,2]),
+  p = c(pvalr(corr.young.self.r$P[1,2]),
+        pvalr(corr.young.other.r$P[1,2]),
+        pvalr(corr.young.noone.r$P[1,2]),
+        pvalr(corr.old.self.r$P[1,2]),
+        pvalr(corr.old.other.r$P[1,2]),
+        pvalr(corr.old.noone.r$P[1,2]))
+)
+
+
+kable(corr.table.r, 
+      align = c(rep('l',2), rep('c',2)),
+      caption = "Correlations between alphas and % correct" ) %>%
+  kable_styling() 
+
+
+```
+
+```{r echo=FALSE, message=FALSE}
+
+## Compare model fit between groups
+
+set.seed(213)
+
+# loads data
+group.fit <- read_xlsx("Compare_fit_between_groups.xlsx", sheet = 1, col_names = T) 
+group.fit <- group.fit %>%
+  mutate(group = factor(group, 
+                        levels = c(1,2), 
+                        labels = c("young", "old"))) 
+
+group.fit.av <- group.fit %>%
+  dplyr::group_by(group) %>%
+  dplyr::summarise(n = n(), mean = mean(fit,na.rm=T), median = median(fit,na.rm=T), sd = sd(fit,na.rm=T), se = sd/sqrt(n))
+
+wil.group.fit <- wilcox.test(
+  group.fit$fit[group.fit$group == "young"],
+  group.fit$fit[group.fit$group == "old"],
+  paired = FALSE)
+
+Zstat.group.fit  <- qnorm(wil.group.fit$p.value/2)
+
+fit.es <- group.fit %>% wilcox_effsize(fit ~ group, ci = TRUE)
+
+```
+
+## Differences between young and old on psychopathic traits excluding extreme scores
+
+```{r echo=FALSE, message=FALSE}
+
+set.seed(312)
+
+# SRP affective interpersonal, young vs older
+
+df.full.srp3 <- df.full %>% drop_na("agent1-alpha") 
+df.full.srp3$SRP_affective_interpersonal[abs(df.full.srp3$SRP_affective_interpersonal_z) > 3] <- NA
+df.full.srp3$SRP_lifestyle_antisocial[abs(df.full.srp3$SRP_lifestyle_antisocial_z) > 3] <- NA
+
+df.full.srp3.ai <- df.full.srp3 %>% drop_na("agent1-alpha") %>% 
+  drop_na("SRP_affective_interpersonal")
+
+diff.srp3.ai <- wilcox.test(
+  df.full.srp3.ai$SRP_affective_interpersonal[df.full.srp3.ai$group == "young"],
+  df.full.srp3.ai$SRP_affective_interpersonal[df.full.srp3.ai$group == "old"],
+  paired = FALSE)
+
+wil.srp3.ai.es <- df.full.srp3.ai %>% wilcox_effsize(SRP_affective_interpersonal ~ group, ci = TRUE)
+
+# SRP lifestyle antisocial, young vs older
+
+df.full.srp3.la <- df.full.srp3 %>% drop_na("agent1-alpha") %>% 
+  drop_na("SRP_lifestyle_antisocial")
+
+diff.srp3.la <- wilcox.test(
+  df.full.srp3.la$SRP_lifestyle_antisocial[df.full.srp3.la$group == "young"],
+  df.full.srp3.la$SRP_lifestyle_antisocial[df.full.srp3.la$group == "old"],
+  paired = FALSE)
+
+wil.srp3.la.es <- df.full.srp3.la %>% wilcox_effsize(SRP_lifestyle_antisocial ~ group, ci = TRUE)
+
+# calculate the z statistic
+
+Zstat.srp3.ai  <- qnorm(diff.srp3.ai$p.value/2)
+Zstat.srp3.la  <- qnorm(diff.srp3.la$p.value/2)  
+
+n.young3 = c(
+  length(which(!is.na(df.full.srp3$SRP_affective_interpersonal[df.full.srp3$group == "young"]))),    
+  length(which(!is.na(df.full.srp3$SRP_lifestyle_antisocial[df.full.srp3$group == "young"]))))
+
+n.old3 = c(
+  length(which(!is.na(df.full.srp3$SRP_affective_interpersonal[df.full.srp3$group == "old"]))),    
+  length(which(!is.na(df.full.srp3$SRP_lifestyle_antisocial[df.full.srp3$group == "old"]))))
+
+# table of group tests
+
+id.diff.table.srp3 <- tibble(
+  'Questionnaire:' = c("SRP affective interpersonal", "SRP lifestyle antisocial"),
+  'Young mean (s.d)' = c(
+    paste0(round(mean(df.full.srp3$SRP_affective_interpersonal[df.full.srp3$group == "young"], na.rm = T),2),' (',round(sd(df.full.srp3$SRP_affective_interpersonal[df.full.srp3$group == "young"], na.rm = T),2),')'),
+    paste0(round(mean(df.full.srp3$SRP_lifestyle_antisocial[df.full.srp3$group == "young"], na.rm = T),2),' (',round(sd(df.full.srp3$SRP_lifestyle_antisocial[df.full.srp3$group == "young"], na.rm = T),2),')')),
+  'Older mean (s.d)' = c(
+    paste0(round(mean(df.full.srp3$SRP_affective_interpersonal[df.full.srp3$group == "old"], na.rm = T),2),' (',round(sd(df.full.srp3$SRP_affective_interpersonal[df.full.srp3$group == "old"], na.rm = T),2),')'),
+    paste0(round(mean(df.full.srp3$SRP_lifestyle_antisocial[df.full.srp3$group == "old"], na.rm = T),2),' (',round(sd(df.full.srp3$SRP_lifestyle_antisocial[df.full.srp3$group == "old"], na.rm = T),2),')')),
+  Z = c(round(Zstat.srp3.ai,3), round(Zstat.srp3.la,3)),
+  p = pvalr(c(diff.srp3.ai$p.value, diff.srp3.la$p.value))
+)
+
+kable(id.diff.table.srp3,
+      align = c('l', rep('c',5)),
+      caption = "Differences between groups in trait measures excluding extreme scores") %>% kable_styling()
+
+```
+
+## Correlations between psychopathic traits and learning parameters excluding extreme scores
+
+```{r echo=FALSE}
+
+# SRP - affective interpersonal & alphas
+
+corr.young.self.ai3 <- 
+  rcorr(df.full.srp3$`agent1-alpha`[df.full.srp3$Group == 1],
+        df.full.srp3$SRP_affective_interpersonal[df.full.srp3$Group == 1],
+        type = "spearman")
+
+corr.young.other.ai3 <- 
+  rcorr(df.full.srp3$`agent2-alpha`[df.full.srp3$Group == 1],
+        df.full.srp3$SRP_affective_interpersonal[df.full.srp3$Group == 1],
+        type = "spearman")
+
+corr.young.noone.ai3 <- 
+  rcorr(df.full.srp3$`agent3-alpha`[df.full.srp3$Group == 1],
+        df.full.srp3$SRP_affective_interpersonal[df.full.srp3$Group == 1],
+        type = "spearman")
+
+corr.old.self.ai3 <- 
+  rcorr(df.full.srp3$`agent1-alpha`[df.full.srp3$Group == 2],
+        df.full.srp3$SRP_affective_interpersonal[df.full.srp3$Group == 2],
+        type = "spearman")
+
+corr.old.other.ai3 <- 
+  rcorr(df.full.srp3$`agent2-alpha`[df.full.srp3$Group == 2],
+        df.full.srp3$SRP_affective_interpersonal[df.full.srp3$Group == 2],
+        type = "spearman")
+
+corr.old.noone.ai3 <- 
+  rcorr(df.full.srp3$`agent3-alpha`[df.full.srp3$Group == 2],
+        df.full.srp3$SRP_affective_interpersonal[df.full.srp3$Group == 2],
+        type = "spearman")
+
+# table of these correlations 
+
+corr.table.ai3 <- tibble(
+  Group = c("Young", "Young", "Young", "Older", "Older", "Older"),
+  Agent = rep(c("Self", "Other", "No one"), 2),
+  r = c(corr.young.self.ai3$r[1,2],
+        corr.young.other.ai3$r[1,2],
+        corr.young.noone.ai3$r[1,2],        
+        corr.old.self.ai3$r[1,2],
+        corr.old.other.ai3$r[1,2],
+        corr.old.noone.ai3$r[1,2]),
+  p = c(corr.young.self.ai3$P[1,2],
+        corr.young.other.ai3$P[1,2],
+        corr.young.noone.ai3$P[1,2],
+        corr.old.self.ai3$P[1,2],
+        corr.old.other.ai3$P[1,2],
+        corr.old.noone.ai3$P[1,2])
+)
+
+corr.table.ai3$`FDR p` <- NA
+corr.table.ai3$`FDR p` <- p.adjust(corr.table.ai3$p, method = "fdr")
+
+kable(corr.table.ai3,
+      align = c(rep('l',2), rep('c',3)),
+      caption = "Correlations between alphas and affective interpersonal" ) %>%
+  kable_styling() 
+
+```
+
+## Model of alpha controlling for IQ
+
+```{r, message=FALSE}
+
+rlmermodel.W <- rlmer(alpha ~ WTAR_Standard + agent*group + (1|ID), data = df.l)
+alphastats.W <- stats.rlmerMod.f(rlmermodel.W)
+
+row.names(alphastats.W) <- c("Intercept", "General intelligence", "Agent (other vs self)", "Agent (no one vs self)", "Group (older vs younger)", "Group * agent (other vs self)", "Group * agent (no one vs self)")
+kable(alphastats.W,
+      align = rep('c',6),
+      caption = "Robust linear mixed model for learning rates controlling for IQ") %>% kable_styling()
+
+```
+
+## Correlations between learning parameters and neuropsychological measures
+
+``` {r}
+
+df.full$alpha_av <- rowMeans(df.full[,c("agent1-alpha", "agent2-alpha", "agent3-alpha")], na.rm = TRUE)
+
+# WTAR Standard & alphas
+
+corr.s <- rcorr(df.full$alpha_av,
+        df.full$WTAR_Standard,
+        type = "spearman")
+
+corr.young.s <- 
+  rcorr(df.full$alpha_av[df.full$Group == 1],
+        df.full$WTAR_Standard[df.full$Group == 1],
+        type = "spearman")
+
+corr.old.s <- 
+  rcorr(df.full$alpha_av[df.full$Group == 2],
+        df.full$WTAR_Standard[df.full$Group == 2],
+        type = "spearman")
+
+corr.young.self.s <- 
+  rcorr(df.full$`agent1-alpha`[df.full$Group == 1],
+        df.full$WTAR_Standard[df.full$Group == 1],
+        type = "spearman")
+
+corr.young.other.s <- 
+  rcorr(df.full$`agent2-alpha`[df.full$Group == 1],
+        df.full$WTAR_Standard[df.full$Group == 1],
+        type = "spearman")
+
+corr.young.noone.s <- 
+  rcorr(df.full$`agent3-alpha`[df.full$Group == 1],
+        df.full$WTAR_Standard[df.full$Group == 1],
+        type = "spearman")
+
+corr.old.self.s <- 
+  rcorr(df.full$`agent1-alpha`[df.full$Group == 2],
+        df.full$WTAR_Standard[df.full$Group == 2],
+        type = "spearman")
+
+corr.old.other.s <- 
+  rcorr(df.full$`agent2-alpha`[df.full$Group == 2],
+        df.full$WTAR_Standard[df.full$Group == 2],
+        type = "spearman")
+
+corr.old.noone.s <- 
+  rcorr(df.full$`agent3-alpha`[df.full$Group == 2],
+        df.full$WTAR_Standard[df.full$Group == 2],
+        type = "spearman")
+
+# table of these correlations 
+
+corr.table.s <- tibble(
+  Group = c("Young", "Young", "Young", "Older", "Older", "Older"),
+  Agent = rep(c("Self", "Other", "No one"), 2),
+  r = c(corr.young.self.s$r[1,2],
+        corr.young.other.s$r[1,2],
+        corr.young.noone.s$r[1,2],        
+        corr.old.self.s$r[1,2],
+        corr.old.other.s$r[1,2],
+        corr.old.noone.s$r[1,2]),
+  p = c(corr.young.self.s$P[1,2],
+        corr.young.other.s$P[1,2],
+        corr.young.noone.s$P[1,2],
+        corr.old.self.s$P[1,2],
+        corr.old.other.s$P[1,2],
+        corr.old.noone.s$P[1,2])
+)
+
+kable(corr.table.s, 
+      align = c(rep('l',2), rep('c',2)),
+      caption = "Correlations between alphas and general intelligence" ) %>%
+  kable_styling() 
+
+# partial correlations between SRP & alpha controlling for WTAR_Standard
+
+df.full.pcorr <- df.full %>% tidyr::drop_na("agent2-alpha", "SRP_affective_interpersonal", "WTAR_Standard")
+
+pcorr.young.other.ai.s <- pcor.test(df.full.pcorr$`agent2-alpha`[df.full.pcorr$Group == 1],
+                                  df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 1],
+                                  df.full.pcorr$WTAR_Standard[df.full.pcorr$Group == 1], 
+                                  method = "spearman")
+
+pcorr.old.other.ai.s <- pcor.test(df.full.pcorr$`agent2-alpha`[df.full.pcorr$Group == 2],
+                                df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
+                                df.full.pcorr$WTAR_Standard[df.full.pcorr$Group == 2], 
+                                method = "spearman")
+
+pcorr.young.os.ai.s <- pcor.test(df.full.pcorr$`other-self_alph`[df.full.pcorr$Group == 1],
+                               df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 1],
+                               df.full.pcorr$WTAR_Standard[df.full.pcorr$Group == 1], 
+                               method = "spearman")
+
+pcorr.old.os.ai.s <- pcor.test(df.full.pcorr$`other-self_alph`[df.full.pcorr$Group == 2],
+                             df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
+                             df.full.pcorr$WTAR_Standard[df.full.pcorr$Group == 2], 
+                             method = "spearman")
+
+# ACE in older adults - memory
+
+corr.old.m <- 
+  rcorr(df.full$alpha_av[df.full$Group == 2],
+        df.full$`ACE_(Memory/26)'`[df.full$Group == 2],
+        type = "spearman")
+
+corr.old.self.m <- 
+  rcorr(df.full$`agent1-alpha`[df.full$Group == 2],
+        df.full$`ACE_(Memory/26)'`[df.full$Group == 2],
+        type = "spearman")
+
+corr.old.other.m <- 
+  rcorr(df.full$`agent2-alpha`[df.full$Group == 2],
+        df.full$`ACE_(Memory/26)'`[df.full$Group == 2],
+        type = "spearman")
+
+corr.old.noone.m <- 
+  rcorr(df.full$`agent3-alpha`[df.full$Group == 2],
+        df.full$`ACE_(Memory/26)'`[df.full$Group == 2],
+        type = "spearman")
+
+# Attention
+
+corr.old.a <- 
+  rcorr(df.full$alpha_av[df.full$Group == 2],
+        df.full$`ACE_(Attention/18)'`[df.full$Group == 2],
+        type = "spearman")
+
+corr.old.self.a <- 
+  rcorr(df.full$`agent1-alpha`[df.full$Group == 2],
+        df.full$`ACE_(Attention/18)'`[df.full$Group == 2],
+        type = "spearman")
+
+corr.old.other.a <- 
+  rcorr(df.full$`agent2-alpha`[df.full$Group == 2],
+        df.full$`ACE_(Attention/18)'`[df.full$Group == 2],
+        type = "spearman")
+
+corr.old.noone.a <- 
+  rcorr(df.full$`agent3-alpha`[df.full$Group == 2],
+        df.full$`ACE_(Attention/18)'`[df.full$Group == 2],
+        type = "spearman")
+
+# table of these correlations 
+
+corr.table.ace <- tibble(
+  Subscale = c("Memory", "Memory", "Memory", "Attention", "Attention", "Attention"),
+  Agent = rep(c("Self", "Other", "No one"), 2),
+  r = c(corr.old.self.m$r[1,2],
+        corr.old.other.m$r[1,2],
+        corr.old.noone.m$r[1,2],        
+        corr.old.self.a$r[1,2],
+        corr.old.other.a$r[1,2],
+        corr.old.noone.a$r[1,2]),
+  p = c(corr.old.self.m$P[1,2],
+        corr.old.other.m$P[1,2],
+        corr.old.noone.m$P[1,2],
+        corr.old.self.a$P[1,2],
+        corr.old.other.a$P[1,2],
+        corr.old.noone.a$P[1,2])
+)
+
+kable(corr.table.ace,
+      align = c(rep('l',2), rep('c',2)),
+      caption = "Correlations between alphas and ACE subscales" ) %>%
+  kable_styling() 
+
+# partial correlations between SRP & alpha controlling for ACE memory
+
+pcorr.old.other.ai.m <- pcor.test(df.full.pcorr$`agent2-alpha`[df.full.pcorr$Group == 2],
+                                df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
+                                df.full.pcorr$`ACE_(Memory/26)'`[df.full.pcorr$Group == 2], 
+                                method = "spearman")
+
+pcorr.old.os.ai.m <- pcor.test(df.full.pcorr$`other-self_alph`[df.full.pcorr$Group == 2],
+                             df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
+                             df.full.pcorr$`ACE_(Memory/26)'`[df.full.pcorr$Group == 2], 
+                             method = "spearman")
+
+# partial correlations between SRP & alpha controlling for ACE attention
+
+pcorr.old.other.ai.a <- pcor.test(df.full.pcorr$`agent2-alpha`[df.full.pcorr$Group == 2],
+                                df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
+                                df.full.pcorr$`ACE_(Attention/18)'`[df.full.pcorr$Group == 2], 
+                                method = "spearman")
+
+pcorr.old.os.ai.a <- pcor.test(df.full.pcorr$`other-self_alph`[df.full.pcorr$Group == 2],
+                             df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
+                             df.full.pcorr$`ACE_(Attention/18)'`[df.full.pcorr$Group == 2], 
+                             method = "spearman")
+
 ```
