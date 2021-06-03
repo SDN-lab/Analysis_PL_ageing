@@ -320,14 +320,14 @@ output:
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:left;"> SRP affective interpersonal </td>
+   <td style="text-align:left;"> SRP affective-interpersonal </td>
    <td style="text-align:center;"> 24.36 (8.09) </td>
    <td style="text-align:center;"> 21.09 (7.88) </td>
    <td style="text-align:center;"> -3.1 </td>
    <td style="text-align:center;"> 0.002 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> SRP lifestyle antisocial </td>
+   <td style="text-align:left;"> SRP lifestyle-antisocial </td>
    <td style="text-align:center;"> 22.89 (6.84) </td>
    <td style="text-align:center;"> 20.27 (5.62) </td>
    <td style="text-align:center;"> -2.8 </td>
@@ -339,7 +339,7 @@ output:
 ## Correlations between psychopathic traits and learning parameters
 
 <table class="table" style="margin-left: auto; margin-right: auto;">
-<caption>Correlations between alphas and affective interpersonal</caption>
+<caption>Correlations between alphas and affective-interpersonal</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Group </th>
@@ -375,7 +375,7 @@ output:
    <td style="text-align:left;"> Young </td>
    <td style="text-align:left;"> Other - self </td>
    <td style="text-align:center;"> 0.11 </td>
-   <td style="text-align:center;"> 0.36 </td>
+   <td style="text-align:center;"> 0.34 </td>
    <td style="text-align:center;"> NA </td>
   </tr>
   <tr>
@@ -410,11 +410,6 @@ output:
 </table>
 
 
-```
-## Running nonparametric bootstrap
-## 
-## Running nonparametric bootstrap
-```
 
 ## Plots of main effects
 
@@ -425,6 +420,16 @@ output:
 ![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-13-1.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-13-2.png)<!-- -->
 
 ## Plots of simulated alphas and performance
+
+
+```
+## Parsed with column specification:
+## cols(
+##   Alpha = col_double(),
+##   Choices = col_double(),
+##   Outcomes = col_double()
+## )
+```
 
 ![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
 
@@ -497,14 +502,14 @@ output:
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:left;"> SRP affective interpersonal </td>
+   <td style="text-align:left;"> SRP affective-interpersonal </td>
    <td style="text-align:center;"> 23.65 (6.95) </td>
    <td style="text-align:center;"> 20.19 (5.64) </td>
    <td style="text-align:center;"> -3.3 </td>
    <td style="text-align:center;"> 0.001 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> SRP lifestyle antisocial </td>
+   <td style="text-align:left;"> SRP lifestyle-antisocial </td>
    <td style="text-align:center;"> 22.55 (6.21) </td>
    <td style="text-align:center;"> 19.65 (4.25) </td>
    <td style="text-align:center;"> -3.0 </td>
@@ -516,7 +521,7 @@ output:
 ## Correlations between psychopathic traits and learning parameters excluding extreme scores
 
 <table class="table" style="margin-left: auto; margin-right: auto;">
-<caption>Correlations between alphas and affective interpersonal</caption>
+<caption>Correlations between alphas and affective-interpersonal</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Group </th>
