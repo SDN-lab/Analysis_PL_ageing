@@ -409,7 +409,122 @@ output:
 </tbody>
 </table>
 
+## Indirect effect of age on relative prosocial learning via psychopathic traits
 
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Standard mediation model</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Path </th>
+   <th style="text-align:center;"> Coefficient </th>
+   <th style="text-align:center;"> CI_low </th>
+   <th style="text-align:center;"> CI_high </th>
+   <th style="text-align:center;"> t </th>
+   <th style="text-align:center;"> df_error </th>
+   <th style="text-align:center;"> p </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> a </td>
+   <td style="text-align:center;"> -0.41 </td>
+   <td style="text-align:center;"> -0.66 </td>
+   <td style="text-align:center;"> -0.16 </td>
+   <td style="text-align:center;"> -3.2 </td>
+   <td style="text-align:center;"> 146 </td>
+   <td style="text-align:center;"> 0.00 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> b </td>
+   <td style="text-align:center;"> -0.11 </td>
+   <td style="text-align:center;"> -0.25 </td>
+   <td style="text-align:center;"> 0.03 </td>
+   <td style="text-align:center;"> -1.6 </td>
+   <td style="text-align:center;"> 145 </td>
+   <td style="text-align:center;"> 0.11 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> c </td>
+   <td style="text-align:center;"> 0.30 </td>
+   <td style="text-align:center;"> 0.02 </td>
+   <td style="text-align:center;"> 0.57 </td>
+   <td style="text-align:center;"> 2.1 </td>
+   <td style="text-align:center;"> 146 </td>
+   <td style="text-align:center;"> 0.03 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> c' </td>
+   <td style="text-align:center;"> 0.24 </td>
+   <td style="text-align:center;"> -0.04 </td>
+   <td style="text-align:center;"> 0.53 </td>
+   <td style="text-align:center;"> 1.7 </td>
+   <td style="text-align:center;"> 145 </td>
+   <td style="text-align:center;"> 0.09 </td>
+  </tr>
+</tbody>
+</table>
+
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Moderated mediation model</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Path </th>
+   <th style="text-align:center;"> Coefficient </th>
+   <th style="text-align:center;"> CI_low </th>
+   <th style="text-align:center;"> CI_high </th>
+   <th style="text-align:center;"> t </th>
+   <th style="text-align:center;"> df_error </th>
+   <th style="text-align:center;"> p </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> a </td>
+   <td style="text-align:center;"> -0.41 </td>
+   <td style="text-align:center;"> -0.66 </td>
+   <td style="text-align:center;"> -0.16 </td>
+   <td style="text-align:center;"> -3.23 </td>
+   <td style="text-align:center;"> 146 </td>
+   <td style="text-align:center;"> 0.00 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> b young </td>
+   <td style="text-align:center;"> 0.04 </td>
+   <td style="text-align:center;"> -0.19 </td>
+   <td style="text-align:center;"> 0.27 </td>
+   <td style="text-align:center;"> 0.34 </td>
+   <td style="text-align:center;"> 72 </td>
+   <td style="text-align:center;"> 0.74 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> b older </td>
+   <td style="text-align:center;"> -0.24 </td>
+   <td style="text-align:center;"> -0.41 </td>
+   <td style="text-align:center;"> -0.08 </td>
+   <td style="text-align:center;"> -2.97 </td>
+   <td style="text-align:center;"> 72 </td>
+   <td style="text-align:center;"> 0.00 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> c </td>
+   <td style="text-align:center;"> 0.30 </td>
+   <td style="text-align:center;"> 0.02 </td>
+   <td style="text-align:center;"> 0.57 </td>
+   <td style="text-align:center;"> 2.14 </td>
+   <td style="text-align:center;"> 146 </td>
+   <td style="text-align:center;"> 0.03 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> c' </td>
+   <td style="text-align:center;"> 0.24 </td>
+   <td style="text-align:center;"> -0.04 </td>
+   <td style="text-align:center;"> 0.51 </td>
+   <td style="text-align:center;"> 1.71 </td>
+   <td style="text-align:center;"> 144 </td>
+   <td style="text-align:center;"> 0.09 </td>
+  </tr>
+</tbody>
+</table>
 
 ## Plots of main effects
 
@@ -420,16 +535,6 @@ output:
 ![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-13-1.png)<!-- -->![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-13-2.png)<!-- -->
 
 ## Plots of simulated alphas and performance
-
-
-```
-## Parsed with column specification:
-## cols(
-##   Alpha = col_double(),
-##   Choices = col_double(),
-##   Outcomes = col_double()
-## )
-```
 
 ![](Prosocial_learning_analysis_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
 
@@ -455,7 +560,7 @@ output:
   <tr>
    <td style="text-align:left;"> Young </td>
    <td style="text-align:left;"> Other </td>
-   <td style="text-align:center;"> 0.66 </td>
+   <td style="text-align:center;"> 0.65 </td>
    <td style="text-align:center;"> &lt;0.001 </td>
   </tr>
   <tr>
@@ -603,7 +708,7 @@ output:
    <td style="text-align:center;"> &lt;0.001 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> General intelligence </td>
+   <td style="text-align:left;"> IQ </td>
    <td style="text-align:center;"> -0.000 </td>
    <td style="text-align:center;"> -0.000 </td>
    <td style="text-align:center;"> 0.000 </td>
@@ -662,7 +767,7 @@ output:
 ## Correlations between learning parameters and neuropsychological measures
 
 <table class="table" style="margin-left: auto; margin-right: auto;">
-<caption>Correlations between alphas and general intelligence</caption>
+<caption>Correlations between alphas and IQ</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Group </th>
@@ -760,3 +865,5 @@ output:
   </tr>
 </tbody>
 </table>
+
+

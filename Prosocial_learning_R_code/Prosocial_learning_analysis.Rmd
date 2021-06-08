@@ -31,7 +31,8 @@ pacman::p_load(boot, # for bootstrapping
                robustlmm, # robust mixed models
                rstatix, # for wilcox effect sizes
                stats, # stats functions
-               tidyverse) # ggplot, dplyr packages
+               tidyverse, # ggplot, dplyr packages
+               writexl) # write xlsx files
 
 ## Set up and functions
 
@@ -422,6 +423,8 @@ tbt3fills <- tbt3fills[pltorder]
 plt.data <- df.tav %>%
   dplyr::group_by(agent, group, condition, trialno) %>%
   dplyr::summarise(n = n(), mean = mean(choiceP,na.rm=T), sd = sd(choiceP,na.rm=T), se = sd/sqrt(n))
+
+df.3c <- plt.data
 
 if (saveplots == 1) {tiff(tbtplotname, units="in", width = tbtplotW, height = plotH, res = resolution)}
 
@@ -1011,9 +1014,9 @@ pr.otherself.ai <- paired.r(pcorr.young.os.ai$estimate, pcorr.old.os.ai$estimate
 
 ```
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+## Indirect effect of age on relative prosocial learning via psychopathic traits
 
-## Mediation of age effects by psychopathic traits
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 df.med <- df.full %>% drop_na(c("group", "SRP_affective_interpersonal", "agent2-alpha"))
 
@@ -1023,9 +1026,9 @@ fit.mediator=rlm(SRP_affective_interpersonal ~ group, df.med)
 m.mediator <- model_parameters(fit.mediator, standardize = "refit")
 # print(summary(fit.mediator))
 
-fit.totaleffect <- rlm(`other-self_alph` ~ group, df.med)
-m.totaleffect <- model_parameters(fit.totaleffect, standardize = "refit")
-# print(summary(fit.totaleffect))
+fit.directeffect <- rlm(`other-self_alph` ~ group, df.med)
+m.directeffect <- model_parameters(fit.directeffect, standardize = "refit")
+# print(summary(fit.directeffect))
 
 fit.dv=rlm(`other-self_alph` ~ group + SRP_affective_interpersonal, df.med)
 m.dv <- model_parameters(fit.dv, standardize = "refit")
@@ -1055,6 +1058,32 @@ m.old <- model_parameters(fit.old, standardize = "refit")
 
 fit.young <- rlm(`other-self_alph` ~ SRP_affective_interpersonal, df.med[df.med$group == "young",])
 m.young <- model_parameters(fit.young, standardize = "refit")
+
+standard.model <- tibble(Path = c("a", "b", "c", "c'"), 
+                Coefficient = c(m.mediator$Coefficient[nrow(m.mediator)], m.dv$Coefficient[nrow(m.dv)], m.directeffect$Coefficient[nrow(m.directeffect)], m.dv$Coefficient[nrow(m.dv)-1]), 
+                CI_low = c(m.mediator$CI_low[nrow(m.mediator)], m.dv$CI_low[nrow(m.dv)], m.directeffect$CI_low[nrow(m.directeffect)], m.dv$CI_low[nrow(m.dv)-1]), 
+                CI_high = c(m.mediator$CI_high[nrow(m.mediator)], m.dv$CI_high[nrow(m.dv)], m.directeffect$CI_high[nrow(m.directeffect)], m.dv$CI_high[nrow(m.dv)-1]), 
+                t = c(m.mediator$t[nrow(m.mediator)], m.dv$t[nrow(m.dv)], m.directeffect$t[nrow(m.directeffect)], m.dv$t[nrow(m.dv)-1]), 
+                df_error = c(m.mediator$df_error[nrow(m.mediator)], m.dv$df_error[nrow(m.dv)], m.directeffect$df_error[nrow(m.directeffect)], m.dv$df_error[nrow(m.dv)-1]), 
+                p = c(m.mediator$p[nrow(m.mediator)], m.dv$p[nrow(m.dv)], m.directeffect$p[nrow(m.directeffect)], m.dv$p[nrow(m.dv)-1]))
+
+kable(standard.model,
+      align = c('l', rep('c',6)),
+      caption = "Standard mediation model" ) %>%
+  kable_styling() 
+
+moderated.model <- tibble(Path = c("a", "b young", "b older", "c", "c'"), 
+                Coefficient = c(m.mediator$Coefficient[nrow(m.mediator)], m.young$Coefficient[nrow(m.young)], m.old$Coefficient[nrow(m.old)], m.directeffect$Coefficient[nrow(m.directeffect)], m.dv.mod$Coefficient[nrow(m.dv.mod)-2]),
+                CI_low = c(m.mediator$CI_low[nrow(m.mediator)], m.young$CI_low[nrow(m.young)], m.old$CI_low[nrow(m.old)], m.directeffect$CI_low[nrow(m.directeffect)], m.dv.mod$CI_low[nrow(m.dv.mod)-2]), 
+                CI_high = c(m.mediator$CI_high[nrow(m.mediator)], m.young$CI_high[nrow(m.young)], m.old$CI_high[nrow(m.old)], m.directeffect$CI_high[nrow(m.directeffect)], m.dv.mod$CI_high[nrow(m.dv.mod)-2]), 
+                t = c(m.mediator$t[nrow(m.mediator)], m.young$t[nrow(m.young)], m.old$t[nrow(m.old)], m.directeffect$t[nrow(m.directeffect)], m.dv.mod$t[nrow(m.dv.mod)-2]), 
+                df_error = c(m.mediator$df_error[nrow(m.mediator)], m.young$df_error[nrow(m.young)], m.old$df_error[nrow(m.old)], m.directeffect$df_error[nrow(m.directeffect)], m.dv.mod$df_error[nrow(m.dv.mod)-2]), 
+                p = c(m.mediator$p[nrow(m.mediator)], m.young$p[nrow(m.young)], m.old$p[nrow(m.old)], m.directeffect$p[nrow(m.directeffect)], m.dv.mod$p[nrow(m.dv.mod)-2]))
+
+kable(moderated.model,
+      align = c('l', rep('c',6)),
+      caption = "Moderated mediation model" ) %>%
+  kable_styling() 
 
 ```
 
@@ -1117,6 +1146,7 @@ for (v in 1) {
       plt.data[plt.data$condition == c, col] <- med.boot[1, col]
   }
   
+  df.3a <- plt.data
   
   plt <- ggplot(plt.data, aes(x=agent, y=bootMed, group = condition, fill = condition, color = condition, alpha = condition)) +
     geom_bar(stat= "identity", position=position_dodge(0.75), width = 0.75, size = 0.4, color = 'black') +
@@ -1205,6 +1235,8 @@ for (g in plt.data$group) {
     plt.data[plt.data$group == g, col] <- med.boot[1, col]
 }
 
+df.3b <- plt.data
+
 plt <- ggplot(plt.data, aes(x=group, y=bootMed, alpha = group)) +
   geom_bar(stat= "identity", width = 0.5, size = 0.4, color = 'black', fill = bar1col) +
   geom_jitter(data = df.full, aes(x = group, y = `other-self_alph`, color = group), position = position_jitterdodge(dodge.width = 0.5, jitter.height = 0, jitter.width = 0.05), size = 2, alpha = 0.3) +
@@ -1265,6 +1297,8 @@ for (g in plt.data$group) {
   for (col in colnames(med.boot)[2:ncol(med.boot)])
     plt.data[plt.data$group == g, col] <- med.boot[1, col]
 }
+
+df.s1 <- plt.data
 
 graphname <- paste0('Plots/beta_by_group_wsig.jpeg')
 if (saveplots == 1) {tiff(graphname, units="in", width=osplotW, height=plotH, res=resolution)}
@@ -1376,16 +1410,16 @@ plot.other.ai.young <- ggplot(df.full.young, aes(x = `agent2-alpha`, y = SRP_aff
   annotate(geom='richtext', x = 0.035, y = 10, 
            label = paste0("_r_","<sub>s</sub>=", round(corr.young.other.ai$r[1,2],2),", _p_=", round(corr.young.other.ai$P[1,2],2)), 
            fill = NA, label.color = NA)
-  
-  plot.other.ai.young
+
+plot.other.ai.young
 
 if (saveplots == 1) {dev.off()}
-  
+
 ```
 
 ## Plots of simulated alphas and performance
 
-```{r}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 df.opt <- read_csv("Optimal_alpha.csv", col_names = T)
 
@@ -1437,8 +1471,8 @@ df.full$alpha_av <- rowMeans(df.full[,c("agent1-alpha", "agent2-alpha", "agent3-
 df.full$corr_av <- rowMeans(df.full[,c("agent1-corr", "agent2-corr", "agent3-corr")], na.rm = TRUE)
 
 corr.r <- rcorr(df.full$alpha_av,
-        df.full$corr_av,
-        type = "spearman")
+                df.full$corr_av,
+                type = "spearman")
 
 corr.r.ci <- 
   corr.test(df.full$alpha_av,
@@ -1711,7 +1745,7 @@ kable(corr.table.ai3,
 rlmermodel.W <- rlmer(alpha ~ WTAR_Standard + agent*group + (1|ID), data = df.l)
 alphastats.W <- stats.rlmerMod.f(rlmermodel.W)
 
-row.names(alphastats.W) <- c("Intercept", "General intelligence", "Agent (other vs self)", "Agent (no one vs self)", "Group (older vs younger)", "Group * agent (other vs self)", "Group * agent (no one vs self)")
+row.names(alphastats.W) <- c("Intercept", "IQ", "Agent (other vs self)", "Agent (no one vs self)", "Group (older vs younger)", "Group * agent (other vs self)", "Group * agent (no one vs self)")
 kable(alphastats.W,
       align = rep('c',6),
       caption = "Robust linear mixed model for learning rates controlling for IQ") %>% kable_styling()
@@ -1720,15 +1754,15 @@ kable(alphastats.W,
 
 ## Correlations between learning parameters and neuropsychological measures
 
-``` {r}
+```{r}
 
 df.full$alpha_av <- rowMeans(df.full[,c("agent1-alpha", "agent2-alpha", "agent3-alpha")], na.rm = TRUE)
 
 # WTAR Standard & alphas
 
 corr.s <- rcorr(df.full$alpha_av,
-        df.full$WTAR_Standard,
-        type = "spearman")
+                df.full$WTAR_Standard,
+                type = "spearman")
 
 corr.young.s <- 
   rcorr(df.full$alpha_av[df.full$Group == 1],
@@ -1791,7 +1825,7 @@ corr.table.s <- tibble(
 
 kable(corr.table.s, 
       align = c(rep('l',2), rep('c',2)),
-      caption = "Correlations between alphas and general intelligence" ) %>%
+      caption = "Correlations between alphas and IQ" ) %>%
   kable_styling() 
 
 # partial correlations between SRP & alpha controlling for WTAR_Standard
@@ -1799,24 +1833,24 @@ kable(corr.table.s,
 df.full.pcorr <- df.full %>% tidyr::drop_na("agent2-alpha", "SRP_affective_interpersonal", "WTAR_Standard")
 
 pcorr.young.other.ai.s <- pcor.test(df.full.pcorr$`agent2-alpha`[df.full.pcorr$Group == 1],
-                                  df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 1],
-                                  df.full.pcorr$WTAR_Standard[df.full.pcorr$Group == 1], 
-                                  method = "spearman")
+                                    df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 1],
+                                    df.full.pcorr$WTAR_Standard[df.full.pcorr$Group == 1], 
+                                    method = "spearman")
 
 pcorr.old.other.ai.s <- pcor.test(df.full.pcorr$`agent2-alpha`[df.full.pcorr$Group == 2],
-                                df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
-                                df.full.pcorr$WTAR_Standard[df.full.pcorr$Group == 2], 
-                                method = "spearman")
+                                  df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
+                                  df.full.pcorr$WTAR_Standard[df.full.pcorr$Group == 2], 
+                                  method = "spearman")
 
 pcorr.young.os.ai.s <- pcor.test(df.full.pcorr$`other-self_alph`[df.full.pcorr$Group == 1],
-                               df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 1],
-                               df.full.pcorr$WTAR_Standard[df.full.pcorr$Group == 1], 
-                               method = "spearman")
+                                 df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 1],
+                                 df.full.pcorr$WTAR_Standard[df.full.pcorr$Group == 1], 
+                                 method = "spearman")
 
 pcorr.old.os.ai.s <- pcor.test(df.full.pcorr$`other-self_alph`[df.full.pcorr$Group == 2],
-                             df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
-                             df.full.pcorr$WTAR_Standard[df.full.pcorr$Group == 2], 
-                             method = "spearman")
+                               df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
+                               df.full.pcorr$WTAR_Standard[df.full.pcorr$Group == 2], 
+                               method = "spearman")
 
 # ACE in older adults - memory
 
@@ -1889,25 +1923,147 @@ kable(corr.table.ace,
 # partial correlations between SRP & alpha controlling for ACE memory
 
 pcorr.old.other.ai.m <- pcor.test(df.full.pcorr$`agent2-alpha`[df.full.pcorr$Group == 2],
-                                df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
-                                df.full.pcorr$`ACE_(Memory/26)'`[df.full.pcorr$Group == 2], 
-                                method = "spearman")
+                                  df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
+                                  df.full.pcorr$`ACE_(Memory/26)'`[df.full.pcorr$Group == 2], 
+                                  method = "spearman")
 
 pcorr.old.os.ai.m <- pcor.test(df.full.pcorr$`other-self_alph`[df.full.pcorr$Group == 2],
-                             df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
-                             df.full.pcorr$`ACE_(Memory/26)'`[df.full.pcorr$Group == 2], 
-                             method = "spearman")
+                               df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
+                               df.full.pcorr$`ACE_(Memory/26)'`[df.full.pcorr$Group == 2], 
+                               method = "spearman")
 
 # partial correlations between SRP & alpha controlling for ACE attention
 
 pcorr.old.other.ai.a <- pcor.test(df.full.pcorr$`agent2-alpha`[df.full.pcorr$Group == 2],
-                                df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
-                                df.full.pcorr$`ACE_(Attention/18)'`[df.full.pcorr$Group == 2], 
-                                method = "spearman")
+                                  df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
+                                  df.full.pcorr$`ACE_(Attention/18)'`[df.full.pcorr$Group == 2], 
+                                  method = "spearman")
 
 pcorr.old.os.ai.a <- pcor.test(df.full.pcorr$`other-self_alph`[df.full.pcorr$Group == 2],
-                             df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
-                             df.full.pcorr$`ACE_(Attention/18)'`[df.full.pcorr$Group == 2], 
-                             method = "spearman")
+                               df.full.pcorr$SRP_affective_interpersonal[df.full.pcorr$Group == 2],
+                               df.full.pcorr$`ACE_(Attention/18)'`[df.full.pcorr$Group == 2], 
+                               method = "spearman")
+
+```
+
+```{r eval=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+
+## Create source data
+
+# Fig. 2a & 2b
+
+df.mi <- df.mi %>%
+  mutate(Simulated = factor(Simulated,
+                            levels = c(paste0("1","<i>\u03B1</i>","1","<i>\u03B2</i>"), # remove html formatting
+                                       paste0("3","<i>\u03B1</i>","1","<i>\u03B2</i>"),
+                                       paste0("2","<i>\u03B1</i>","1","<i>\u03B2</i>"),
+                                       paste0("3","<i>\u03B1</i>","3","<i>\u03B2</i>")),
+                            labels = c(paste0("1","\u03B1","1","\u03B2"), 
+                                       paste0("3","\u03B1","1","\u03B2"),
+                                       paste0("2","\u03B1","1","\u03B2"),
+                                       paste0("3","\u03B1","3","\u03B2")))) %>%
+  mutate(Estimated = factor(Estimated,
+                            levels = c(paste0("1","<i>\u03B1</i>","1","<i>\u03B2</i>"), # remove html formatting
+                                       paste0("3","<i>\u03B1</i>","1","<i>\u03B2</i>"),
+                                       paste0("2","<i>\u03B1</i>","1","<i>\u03B2</i>"),
+                                       paste0("3","<i>\u03B1</i>","3","<i>\u03B2</i>")),
+                            labels = c(paste0("1","\u03B1","1","\u03B2"), 
+                                       paste0("3","\u03B1","1","\u03B2"),
+                                       paste0("2","\u03B1","1","\u03B2"),
+                                       paste0("3","\u03B1","3","\u03B2"))))
+
+# Fig. 2c
+
+df.pr <- df.pr %>%  
+  mutate(Simulated = factor(Simulated,
+                            levels = c(1,2,3,4),
+                            labels = c(paste0("\u03B1","self"), # rename models with alpha and beta symbols
+                                       paste0("\u03B1","other"),
+                                       paste0("\u03B1","no one"),
+                                       paste0("\u03B2")))) %>% 
+  mutate(Recovered = factor(Recovered,
+                            levels = c(1,2,3,4),
+                            labels = c(paste0("\u03B1","self"),
+                                       paste0("\u03B1","other"),
+                                       paste0("\u03B1","no one"),
+                                       paste0("\u03B2"))))
+
+# Fig. 2d
+
+df.fit <- df.fit %>%
+  mutate(Model = factor(Model,
+                            levels = c(paste0("1","<i>\u03B1</i>","1","<i>\u03B2</i>"), # remove html formatting
+                                       paste0("3","<i>\u03B1</i>","1","<i>\u03B2</i>"),
+                                       paste0("2","<i>\u03B1</i>","1","<i>\u03B2</i>"),
+                                       paste0("3","<i>\u03B1</i>","3","<i>\u03B2</i>")),
+                            labels = c(paste0("1","\u03B1","1","\u03B2"), 
+                                       paste0("3","\u03B1","1","\u03B2"),
+                                       paste0("2","\u03B1","1","\u03B2"),
+                                       paste0("3","\u03B1","3","\u03B2"))))
+
+# Fig. 2e in correct format: df.opt
+
+# Fig. 2f
+
+df.2f <- df.l %>% select(c("ID", "agent", "alpha", "corr"))
+
+# Fig. 3a 
+
+df.3a <- df.3a %>% select(c("agent", "group", "n", "bootMed", "bootSE"))
+
+# Fig. 3b
+
+df.3b <- df.3b %>% select(c("group", "n", "bootMed", "bootSE"))
+
+# 3c in correct format: df.3c
+
+# Fig. 4a
+
+df.full.older <- df.full.older %>% select(c("agent2-alpha", "SRP_affective_interpersonal")) %>% drop_na()
+
+# Fig. 4b
+  
+df.full.young <- df.full.young %>% select(c("agent2-alpha", "SRP_affective_interpersonal")) %>% drop_na()
+
+# Fig. 5a in correct format: standard.model
+
+# Fig. 5b in correct format: moderated.model
+
+# Fig. S1
+
+df.s1 <- df.s1 %>% select(c("group", "n", "bootMed", "bootSE"))
+
+# Table S3 in correct format: corr.table.r 
+
+# Table S4
+
+df.s4 <- tibble(agent = c("other", "other", "other-self", "other-self"), 
+                correlation = rep(c("standard", "partial"), 2), 
+                rs = c(corr.old.other.ai$r[1,2], pcorr.old.other.ai$estimate, corr.old.otherself.ai$r[1,2], pcorr.old.os.ai$estimate), 
+                p = c(corr.old.other.ai$P[1,2], pcorr.old.other.ai$p.value, corr.old.otherself.ai$P[1,2], pcorr.old.os.ai$p.value))
+
+# Table S5 in correct format: corr.table.ai
+
+# Table S7 in correct format: corr.table.ai3
+
+# Table S9
+
+df.s9 <- bind_rows(corr.table.s, corr.table.ace)
+df.s9$Group[is.na(df.s9$Group)] <- "Older"
+df.s9$Subscale[is.na(df.s9$Subscale)] <- "IQ"
+
+# Table S10
+
+df.s10 <- tibble(agent = c(rep("other", 4), rep("other-self", 4)), 
+                 correlation = rep(c("standard", rep("partial", 3)), 2), 
+                 control = rep(c("NA", "IQ", "Memory", "Attention"),2),
+                 rs = c(corr.old.other.ai$r[1,2], pcorr.old.other.ai.s$estimate, pcorr.old.other.ai.m$estimate, pcorr.old.other.ai.a$estimate,
+                        corr.old.otherself.ai$r[1,2], pcorr.old.os.ai.s$estimate, pcorr.old.os.ai.m$estimate, pcorr.old.os.ai.a$estimate), 
+                 p = c(corr.old.other.ai$P[1,2], pcorr.old.other.ai.s$p.value, pcorr.old.other.ai.m$p.value, pcorr.old.other.ai.a$p.value,
+                       corr.old.otherself.ai$P[1,2], pcorr.old.os.ai.s$p.value, pcorr.old.os.ai.m$p.value, pcorr.old.os.ai.a$p.value))
+
+source.data <- list(df.mi, df.pr, df.fit, df.opt, df.2f, df.3a, df.3b, df.3c, df.full.older, df.full.young, standard.model, moderated.model, df.s1, corr.table.r, df.s4, corr.table.ai, corr.table.ai3, df.s9, df.s10)
+names(source.data) <- c("Fig2a-b", "Fig2c", "Fig2d", "Fig2e", "Fig2f", "Fig3a", "Fig3b", "Fig3c", "Fig4a", "Fig4b", "Fig5a", "Fig5b", "FigS1", "TableS3", "TableS4", "TableS5", "TableS7", "TableS9", "TableS10")
+writexl::write_xlsx(source.data, "Source_Data.xlsx")
 
 ```
