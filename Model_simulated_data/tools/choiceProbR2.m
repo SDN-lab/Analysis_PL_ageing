@@ -44,31 +44,36 @@ nr_trials_raw = size(rootfile.beh{1,1}.agent,1); % get number of trials
 n_subj      = length(rootfile.beh); % get number of participants
 
 if EM == 0
-    try
+    %try
         for is = 1:n_subj
-            rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMean(is,1) = nanmean(nanmean(rootfile.(fitops{EM+1}).(modelID){is}.info.prob));
-            rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMedian(is,1) = nanmean(nanmedian(rootfile.(fitops{EM+1}).(modelID){is}.info.prob));
+            rootfile.(fitops{EM+1}).fit.(modelID).eachSubProbMean(is,1) = nanmean(nanmean(rootfile.(fitops{EM+1}).(modelID){is}.info.prob));
+            rootfile.(fitops{EM+1}).fit.(modelID).eachSubProbMedian(is,1) = nanmean(nanmedian(rootfile.(fitops{EM+1}).(modelID){is}.info.prob));
             code = char(rootfile.ID{1,is}.ID);
-            rootfile.(fitops{EM+1}).(modelID).groups(is,1) = str2num(code(3)); % add a vector to the structure with the group codes (1 = young, 2 = old)
         end
-    catch
-    end
+        rootfile.(fitops{EM+1}).fit.(modelID).allSubProbMedian  = nanmedian(rootfile.(fitops{EM+1}).fit.(modelID).eachSubProbMedian);
+        rootfile.(fitops{EM+1}).fit.(modelID).allSubProbMean = nanmean(rootfile.(fitops{EM+1}).fit.(modelID).eachSubProbMean);
+        rootfile.(fitops{EM+1}).fit.(modelID).eachSubProbMedianR2  = (rootfile.(fitops{EM+1}).fit.(modelID).eachSubProbMedian).^2;
+        rootfile.(fitops{EM+1}).fit.(modelID).eachSubProbMeanR2 = (rootfile.(fitops{EM+1}).fit.(modelID).eachSubProbMean).^2;
+        rootfile.(fitops{EM+1}).fit.(modelID).choiceProbMedianR2  = rootfile.(fitops{EM+1}).fit.(modelID).allSubProbMedian^2;
+        rootfile.(fitops{EM+1}).fit.(modelID).choiceProbMeanR2 = rootfile.(fitops{EM+1}).fit.(modelID).allSubProbMean^2;
+    %catch
+    %end
 elseif EM == 1
-    try
+    %try
         for is = 1:n_subj
             rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMean(is,1) = nanmean(nanmean(rootfile.(fitops{EM+1}).(modelID).sub{1,is}.choiceprob));
             rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMedian(is,1) = nanmean(nanmedian(rootfile.(fitops{EM+1}).(modelID).sub{1,is}.choiceprob));
             code = char(rootfile.ID{1,is}.ID);
-            rootfile.(fitops{EM+1}).(modelID).groups(is,1) = str2num(code(3)); % add a vector to the structure with the group codes (1 = young, 2 = old)
         end
-    catch
-    end
+        rootfile.(fitops{EM+1}).(modelID).fit.allSubProbMedian  = nanmedian(rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMedian);
+        rootfile.(fitops{EM+1}).(modelID).fit.allSubProbMean = nanmean(rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMean);
+        rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMedianR2  = (rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMedian).^2;
+        rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMeanR2 = (rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMean).^2;
+        rootfile.(fitops{EM+1}).(modelID).fit.choiceProbMedianR2  = rootfile.(fitops{EM+1}).(modelID).fit.allSubProbMedian^2;
+        rootfile.(fitops{EM+1}).(modelID).fit.choiceProbMeanR2 = rootfile.(fitops{EM+1}).(modelID).fit.allSubProbMean^2;
+    %catch
+    %end
 end
 
-rootfile.(fitops{EM+1}).(modelID).fit.allSubProbMedian  = nanmedian(rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMedian);
-rootfile.(fitops{EM+1}).(modelID).fit.allSubProbMean = nanmean(rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMean);
-rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMedianR2  = (rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMedian).^2;
-rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMeanR2 = (rootfile.(fitops{EM+1}).(modelID).fit.eachSubProbMean).^2;
-rootfile.(fitops{EM+1}).(modelID).fit.choiceProbMedianR2  = rootfile.(fitops{EM+1}).(modelID).fit.allSubProbMedian^2;
-rootfile.(fitops{EM+1}).(modelID).fit.choiceProbMeanR2 = rootfile.(fitops{EM+1}).(modelID).fit.allSubProbMean^2;
+
 
