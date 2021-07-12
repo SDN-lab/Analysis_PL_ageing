@@ -16,9 +16,10 @@ beep off;
 % -------------------------------------------- %
 
 runPR = 1; % whether to run parameter recovery 1 = yes, 0 = no **
-runMI = 1; % whether to run model identifiability 1 = yes, 0 = no **
+runMI = 0; % whether to run model identifiability 1 = yes, 0 = no **
 
 mlePR = 2; % whether PR to run maximum likelihood = 1, or hierarchical em fit = 2 **
+mleMI = 2; % whether MI to run maximum likelihood = 1, or hierarchical em fit = 2 **
 
 % Specify model with which to generate simulated behaviour
 % -------------------------------------------- %
@@ -51,7 +52,8 @@ if runMI == 1
     toRun = [toRun, 2];
 end
 
-toRunN = {'PR', 'MI'};
+toRunOptions = {'PR', 'MI'};
+mleOptions = {'mle', 'em'};
 
 for tr = toRun
     
@@ -66,7 +68,7 @@ for tr = toRun
         type = 2; % how to simulate parameters 1 = grid of values, 2 = distribution **
         nRounds = 10; % how many times to run MI (used in best model counts) **
         modelsTR = 1:length(models); % for MI run all models
-        mle_em = 2; % only hierarchical em fit implemented for MI
+        mle_em = mleMI; % whether to run maximum likelihood = 1, or hierarchical em fit = 2
     end
     
     if type == 2
@@ -364,7 +366,7 @@ for tr = toRun
                     for param2=1:nParam
                         confusion(row,1) = param;
                         confusion(row,2) = param2;
-                        confusion(row,3) = corr(trueAlphaBetas(:,param), fittedParam(:,param2));
+                        confusion(row,3) = corr(trueAlphaBetas(:,param), fittedAlphaBetas(:,param2));
                         row = row  + 1;
                     end
                 end
@@ -383,14 +385,27 @@ for tr = toRun
                 end
                 
             elseif tr == 2
-                    
-                msg = ['Finished em model identifiability for ', modelID, ', round ', num2str(r),' of ', num2str(nRounds)];
                 
-                [s, fits, fitMeasures] = em_MI(s, models(modelsTR));
-                all_s{r,m} = s;
-                all_fits{r,m} = fits;
-                MIname = ['../Prosocial_learning_R_code/Model_identifiability_em.xlsx'];
-                 
+                if mle_em == 1
+                    
+                    msg = ['Finished mle model identifiability for ', modelID, ', round ', num2str(r),' of ', num2str(nRounds)];
+                    
+                    [s, fits, fitMeasures] = mle_MI(s, models(modelsTR), 'aic');
+                    all_s{r,m} = s;
+                    all_fits{r,m} = fits;
+                    MIname = ['../Prosocial_learning_R_code/Model_identifiability_mle.xlsx'];
+                    
+                elseif  mle_em ~= 1
+                    
+                    msg = ['Finished em model identifiability for ', modelID, ', round ', num2str(r),' of ', num2str(nRounds)];
+                    
+                    [s, fits, fitMeasures] = em_MI(s, models(modelsTR), 'xp');
+                    all_s{r,m} = s;
+                    all_fits{r,m} = fits;
+                    MIname = ['../Prosocial_learning_R_code/Model_identifiability_em.xlsx'];
+                    
+                end
+                
             end
             
             disp(msg)
@@ -401,7 +416,7 @@ for tr = toRun
     
     if tr == 2
         
-        xpcol = find(contains(fitMeasures, 'xp'));
+        wincol = find(contains(fitMeasures, 'wins'));
         
         for mod = modelsTR
             
@@ -412,8 +427,8 @@ for tr = toRun
             MItosave(startrow:endrow,2) = modelsTR;
             
             for r = 1:nRounds
-                xps = all_fits{r,mod}(:,xpcol);
-                [~, wins(r,mod)] = max(xps);
+                winner = all_fits{r,mod}(:,wincol);
+                [~, wins(r,mod)] = max(winner);
                 
                 if r > 2
                     fitsLong = cat(3,fitsLong,all_fits{r,mod});
@@ -439,9 +454,9 @@ for tr = toRun
     end
     
     if type == 1
-        name = ['workspaces/',toRunN{tr},'_a_',num2str(grid.alpha(1)),'_',num2str(grid.alpha(end)),'_b_',num2str(grid.beta(1)),'_',num2str(grid.beta(end)),'_n_',num2str(noise),'.mat'];
+        name = ['workspaces/',toRunOptions{tr},'_',mleOptions{mle_em},'_a_',num2str(grid.alpha(1)),'_',num2str(grid.alpha(end)),'_b_',num2str(grid.beta(1)),'_',num2str(grid.beta(end)),'_n_',num2str(noise),'.mat'];
     elseif type == 2
-        name = ['workspaces/',toRunN{tr},'_',num2str(nSubj),'_subjects_',num2str(nRounds),'_rounds_from_distrib'];
+        name = ['workspaces/',toRunOptions{tr},'_',mleOptions{mle_em},'_',num2str(nSubj),'_subjects_',num2str(nRounds),'_rounds_from_distrib'];
     end
     save(name)
     
