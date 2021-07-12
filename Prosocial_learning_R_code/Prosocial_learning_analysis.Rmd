@@ -480,7 +480,7 @@ glmer.tbt.corr <- glmer(choice ~ trialno*agent*group + (1 + trialno*agent|ID), d
 
 performstats <- stats.rlmerMod.f(glmer.tbt.corr)
 
-row.names(performstats) <- c("Intercept", "Trial number", "Agent (other vs self)", "Agent (no one vs self)", "Group (older vs younger)", "Trial number * agent (other vs self)", "Trial number * agent (no one vs self)", "Trial number * group", "Group * agent (other vs self)", "Group * agent (no one vs self)", "Trial number * group * agent (other vs self)", "Trial number * group * agent (no one vs self)")
+row.names(performstats) <- c("Intercept", "Trial number", "Agent (other vs self)", "Agent (no one vs self)", "Group (older vs young)", "Trial number * agent (other vs self)", "Trial number * agent (no one vs self)", "Trial number * group", "Group * agent (other vs self)", "Group * agent (no one vs self)", "Trial number * group * agent (other vs self)", "Trial number * group * agent (no one vs self)")
 kable(performstats,
       align = rep('c',6),
       caption = "Robust linear mixed model for choice performance") %>% kable_styling()
@@ -600,7 +600,7 @@ alphastats <- stats.rlmerMod.f(rlmermodel)
 if (alphastats["agentother:groupold","p"] < .05) { ph.sig.a <- "*" 
 } else if (alphastats["agentother:groupold","p"] >= .05) { ph.sig.a <- NA } 
 
-row.names(alphastats) <- c("Intercept", "Agent (other vs self)", "Agent (no one vs self)", "Group (older vs younger)", "Group * agent (other vs self)", "Group * agent (no one vs self)")
+row.names(alphastats) <- c("Intercept", "Agent (other vs self)", "Agent (no one vs self)", "Group (older vs young)", "Group * agent (other vs self)", "Group * agent (no one vs self)")
 kable(alphastats,
       align = rep('c',6),
       caption = "Robust linear mixed model for learning rates") %>% kable_styling()
@@ -634,19 +634,19 @@ outcomes <- df.l %>%
   dplyr::select(contains(i), contains("group"), contains("agent"))
 names(outcomes)[names(outcomes) == i] <- "outcome"
 
-# younger group, self vs other
+# young group, self vs other
 wil.young.so <- wilcox.test(
   outcomes$outcome[outcomes$group == "young" & outcomes$agent == "other"], 
   outcomes$outcome[outcomes$group == "young" & outcomes$agent == "self"],  
   paired = TRUE, conf.int = TRUE)
 
-# younger group, self vs noone
+# young group, self vs noone
 wil.young.sn <- wilcox.test(
   outcomes$outcome[outcomes$group == "young" & outcomes$agent == "noone"],
   outcomes$outcome[outcomes$group == "young" & outcomes$agent == "self"],
   paired = TRUE, conf.int = TRUE)
 
-# younger group, other vs noone
+# young group, other vs noone
 wil.young.on <- wilcox.test(
   outcomes$outcome[outcomes$group == "young" & outcomes$agent == "noone"],
   outcomes$outcome[outcomes$group == "young" & outcomes$agent == "other"],
@@ -1048,8 +1048,6 @@ set.seed(321) # make it reproducible
 med.results = mediation::mediate(fit.mediator, fit.dv, treat="group", mediator="SRP_affective_interpersonal", boot = T, sims = 10000)
 #print(summary(med.results))
 
-set.seed(321)
-
 med.results.mod = mediation::mediate(fit.mediator, fit.dv.mod, treat="group", mediator="SRP_affective_interpersonal", boot = T, sims = 10000)
 #print(summary(med.results.mod))
 
@@ -1255,9 +1253,9 @@ plt <- ggplot(plt.data, aes(x=group, y=bootMed, alpha = group)) +
         axis.text.y=element_text(size = axtext), 
         axis.title.y=element_markdown(size = axtitle)) +
   theme(legend.position = 'none') + 
-  annotation_custom(grob = textGrob("more self-bias", x=-0.5,  y=0.2, rot = 90,
+  annotation_custom(grob = textGrob("less prosocial", x=-0.55,  y=0.18, rot = 90,
                                     gp=gpar(fontsize=14, fontface="italic"))) +
-  annotation_custom(grob = textGrob("more prosocial", x=-0.5,  y=0.8, rot = 90,
+  annotation_custom(grob = textGrob("more prosocial", x=-0.55,  y=0.8, rot = 90,
                                     gp=gpar(fontsize=14, fontface="italic")))
 
 r <- 3 * (max(ggplot_build(plt)$data[[1]]$x) / ((max(ggplot_build(plt)$data[[2]]$y, na.rm = T)) + (-1*(min(ggplot_build(plt)$data[[2]]$y, na.rm = T))))) 
@@ -1392,7 +1390,7 @@ plot.other.ai.young <- ggplot(df.full.young, aes(x = `agent2-alpha`, y = SRP_aff
   geom_point(aes(color = group, shape = group, alpha = group), size = 6, show.legend = FALSE) + 
   geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0.3, size = 0.75, show.legend = FALSE) + 
   geom_smooth(aes(group = group, color = group, fill = group, linetype = group), method = 'lm', alpha = 0, size = 2) +
-  scale_x_continuous(name = paste0("<i>\u03B1</i>","<sub>other</sub>"," (Younger)"), breaks = c(0.02, 0.04, 0.06, 0.08, 0.1), labels = c('0.02', '0.04', '0.06', '0.08', '0.10')) +
+  scale_x_continuous(name = paste0("<i>\u03B1</i>","<sub>other</sub>"," (Young)"), breaks = c(0.02, 0.04, 0.06, 0.08, 0.1), labels = c('0.02', '0.04', '0.06', '0.08', '0.10')) +
   scale_y_continuous(name = "Psychopathic traits<br>
         <span style='font-size:14pt'>(Affective-interpersonal subscale)</span>", breaks = seq(10, 60, 10)) + 
   coord_cartesian(xlim=c(0.018, 0.102), ylim=c(10, 60)) + 
@@ -1440,7 +1438,7 @@ if (saveplots == 1) {tiff("Plots/Correct_vs_alpha_sim.tiff", units="in", width =
 plot.alpha.corr.sim <- ggplot(df.opt, aes(x = Alpha, y = Choices)) + 
   geom_point(aes(colour = Constant, alpha = Constant, shape = Constant), size = 2) +  
   geom_smooth(method = 'lm', alpha = 0.3, size = 0.75, formula = y ~ poly(x, 2), colour = 'black') +
-  scale_x_continuous(name = paste0("<i>\u03B1</i>"), n.breaks = 5) +
+  scale_x_continuous(name = paste0("Learning rate (<i>\u03B1</i>)"), n.breaks = 5) +
   scale_y_continuous(name = "Percentage correct") + 
   scale_colour_manual(values = c('#365F91', 'grey'), limits = opt.labels) +
   scale_alpha_manual(values = c(0.03), guide = 'none') +
@@ -1536,7 +1534,7 @@ if (saveplots == 1) {tiff("Plots/Correct_vs_alpha.tiff", units="in", width = mod
 plot.alpha.corr <- ggplot(df.l, aes(x = alpha, y = corr)) + 
   geom_point(colour = selfcorcols[1], size = 2, alpha = 0.3, show.legend = FALSE) + 
   geom_smooth(colour = selfcorcols[1], method = 'lm', alpha = 0.3, size = 0.75, formula = y ~ x, show.legend = FALSE) + 
-  scale_x_continuous(name = paste0("<i>\u03B1</i>")) + #, n.breaks = 7) +
+  scale_x_continuous(name = paste0("Learning rate (<i>\u03B1</i>)")) + #, n.breaks = 7) +
   scale_y_continuous(name = "Percentage correct") +
   coord_cartesian(ylim=c(0, 100)) + 
   theme_classic() + 
@@ -1745,7 +1743,7 @@ kable(corr.table.ai3,
 rlmermodel.W <- rlmer(alpha ~ WTAR_Standard + agent*group + (1|ID), data = df.l)
 alphastats.W <- stats.rlmerMod.f(rlmermodel.W)
 
-row.names(alphastats.W) <- c("Intercept", "IQ", "Agent (other vs self)", "Agent (no one vs self)", "Group (older vs younger)", "Group * agent (other vs self)", "Group * agent (no one vs self)")
+row.names(alphastats.W) <- c("Intercept", "IQ", "Agent (other vs self)", "Agent (no one vs self)", "Group (older vs young)", "Group * agent (other vs self)", "Group * agent (no one vs self)")
 kable(alphastats.W,
       align = rep('c',6),
       caption = "Robust linear mixed model for learning rates controlling for IQ") %>% kable_styling()

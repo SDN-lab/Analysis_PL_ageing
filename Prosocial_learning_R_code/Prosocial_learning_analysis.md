@@ -72,7 +72,7 @@ output:
    <td style="text-align:center;"> 0.023 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Group (older vs younger) </td>
+   <td style="text-align:left;"> Group (older vs young) </td>
    <td style="text-align:center;"> -1.200 </td>
    <td style="text-align:center;"> -1.652 </td>
    <td style="text-align:center;"> -0.700 </td>
@@ -194,7 +194,7 @@ output:
    <td style="text-align:center;"> &lt;0.001 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Group (older vs younger) </td>
+   <td style="text-align:left;"> Group (older vs young) </td>
    <td style="text-align:center;"> -0.019 </td>
    <td style="text-align:center;"> -0.028 </td>
    <td style="text-align:center;"> -0.009 </td>
@@ -735,7 +735,7 @@ output:
    <td style="text-align:center;"> &lt;0.001 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Group (older vs younger) </td>
+   <td style="text-align:left;"> Group (older vs young) </td>
    <td style="text-align:center;"> -0.019 </td>
    <td style="text-align:center;"> -0.028 </td>
    <td style="text-align:center;"> -0.009 </td>
