@@ -37,7 +37,7 @@ Run script to generate data files of behavioural data
 #### Step 4 - Prosocial_learning_analysis.Rmd
 Run analysis using R project, script, and files from above output (note sections of this script also plot results from simulation experiments (model identifiability and parameter recovery - see below).
 
-### For simulation experiments (iii):
+### For simulation experiments (ii):
 
 #### Step 1 - Simulate_PR_MI.m 
 Script to run model identifiability and / or parameter recovery
