@@ -1,12 +1,15 @@
 ### This folder contains the scripts and functions to run:
 
 - #### i) learning models (with expectation maximisation; em) on participant data [subfolder Model_real_data]
-- #### ii) analysis on the model parameters and trial by trial behavioural data [subfolder Prosocial_learning_R_code]
-- #### iii) model identifiability and parameter recovery [subfolder Model_simulated_data]
+- #### ii) model identifiability and parameter recovery [subfolder Model_simulated_data]
+- #### iii) analysis on the model parameters and trial by trial behavioural data with plots [subfolder Prosocial_learning_R_code]
 
 [Click here to view plots and main results](https://github.com/SDN-lab/Analysis_PL_ageing/blob/master/Prosocial_learning_R_code/Prosocial_learning_analysis.md)
 
-### For analysis of the real participant data (i & ii):
+### For analysis of the real participant data (i & iii):
+
+#### Step 0 (if data not already in MATLAB structure) - Prosocial_learning_behav_analysis.m
+Script to convert data to the required format from Presentation .log / .csv / .xlsx formats
 
 #### Step 1 - Run_em_model.m 
 Script to run and compare models using expectation maximisation fit
@@ -31,8 +34,8 @@ Run script to generate data files of behavioural data
        - Task_data_participant_averages.xlsx - average for each participant of percentage correct, RT etc across the 3 trials in each of 3 blocks for an agent
        - Task_data_overall_averages.xlsx - average across participants of 2 groups
 
-#### Step 4 - Prosocial_learning_analysis_show_code.Rmd
-Run analysis using R project, script, and files from above output (note sections of this script also plot results from simulation experiments (model identifiability and parameter recovery - see below). Version Prosocial_learning_analysis.Rmd just runs elements for figures and tables without displaying code.
+#### Step 4 - Prosocial_learning_analysis.Rmd
+Run analysis using R project, script, and files from above output (note sections of this script also plot results from simulation experiments (model identifiability and parameter recovery - see below).
 
 ### For simulation experiments (iii):
 
@@ -60,6 +63,8 @@ original model from PNAS with 3 learning rates and 3 betas - beta self, beta oth
 
 ### Developed using:
 
-MATLAB 2019b
+MATLAB 2019b - requires Econometrics and Bioinformatics toolboxes
 
 macOS 10.15 Catalina / 11.1 Big Sur
+
+R version 3.6.2 (2019-12-12)
