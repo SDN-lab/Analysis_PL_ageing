@@ -42,7 +42,7 @@ ylabel('BICint (less is better)','FontWeight','bold');
 
 % II Calculate exceedence probability and compare log model evidence ----
 % Compare LME of two models:
-compM   = {'ms_RWPL','ms_RWPL_SO2_LR'};                                    % models to compare specifically
+compM   = {'ms_RWPL','ms_RWPL_SO_LR'};                                    % models to compare specifically
 subplot(2,2,3);
 for imod=1:numel(compM)
    lmepair(:,imod)    = rootfile.em.(compM{imod}).fit.lme;
