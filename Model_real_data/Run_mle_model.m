@@ -1,0 +1,205 @@
+%%%%%%%%%
+%% Modelling for prosocial learning self/other/no one task using maximum likelihood estimation
+%%%%%%%%%
+
+% Fits RL models using maximum likelihood estimation (mle) approach and does model comparison
+% Written by Patricia Lockwood, April 2019 
+% Edited by Jo Cutler, July 2020
+
+%%%%%%%%%
+% Step 1 - run the Prosocial_learning_behav_analysis script to save a
+% varible 's' that contains a struct for each persons data
+% Step 2 - run this script.  
+% Dependencies: fit_PL_model,
+%               fit_PL_model_optimise
+%               various comp models you have made, in this example 'RWPL'
+%               'RWPL_SO_LR' etc
+% Step 3 - compare the AIC's and BIC's using the script visualize_model_PL
+% Step 4 - if using with fmri, re-sort the modelled values so they are in
+% the correct order in time
+ 
+%% Input for script
+%       - Participants data file format saved in 's':
+
+%% Output from script
+%       - 'output' contains the AIC/BIC for each model
+%       - 's.PL.ml' contains model results from the maximum likelihood fit,including the model parameters per ppt  in 'modelparam' e.g. alpha, beta
+      
+%% Prosocial learning models based Lockwood et PL. (2016), PNAS
+% test different variations of learning rate and beta parameters
+
+% Models compared:
+% M1 = 'RWPL' beta, alpha
+%    simple RL model with one beta and one learning rate
+%
+% M2 = 'RWPL_SO_LR' beta, self LR, other LR, no one LR
+%    RL model with a self other & no one seperate learning
+%    rates and one beta parameter
+%
+% M3 = 'RWPL_SO_comb' RL model with a combined self and other (other & no one)
+%      learning rate and one beta parameter - beta, self LR, other LR
+%
+% M4 = 'RWPL_SON_LR_SON_beta'
+%      original model from PNAS with 3 learning rates and 3 betas - beta self,
+%      beta other, beta no one, self LR, other LR, no one LR
+%
+% M5 = 'RWPL_SNcomb_O_LR' beta, self+no one combined LR, other LR
+%    RL model with a learning rate for self and no-one combined (i.e., 
+%    non-prosocial conditions), and a learning rate for other
+
+%%
+
+%== -I) Prepare workspace: ============================================================================================
+
+clear all
+close all
+addpath('models');
+addpath('tools');
+setFigDefaults; % custom function - make sure it is in the folder
+beep off;
+
+rng default % resets the randomisation seed to ensure results are reproducible (MATLAB 2019b)
+output_dir = '../Prosocial_learning_R_code/'; % enter path to save output in **
+
+%== 0) Load and organise data: ==========================================================================================
+% load data:
+file_name = 'Combined_data_152'; % specify data **
+load([file_name, '.mat']); % .mat file saved from the behavioural script that contains all participants data in 's'
+
+% the names of the different models you want to try 
+MODELS = {'RWPL', 'RWPL_SO_LR', 'RWPL_SO_LR_comb', 'RWPL_SON_LR_SON_beta'};
+
+aicorbic       = 'aic'; % criteria used for model selection - 'aic' or 'bic'
+nrep           = 1; % how many iterations of mle fit to run (so parameters don't get stuck in local minima)
+% can be 1 for decision-making tasks as unlikely to make a difference
+% but more important to be >1 for learning tasks
+
+nSubs          = max(size(s.PL.beh)); % number of ppts
+nTrials        = length(s.PL.beh{1,1}.choice);
+doFigure       = 0;
+
+for sub=1:length(s.PL.ID)
+    
+ID_all(sub, :)=s.PL.ID{1,sub}.ID;
+groups(sub, :)=s.PL.beh{1, sub}.group(1,1);
+
+end
+
+%== I) RUN MODELS: ==========================================================================================
+
+if 1
+    for imod = 1:length(MODELS)
+        modelID=MODELS{imod}; 
+        for i=1:nrep  
+        s.PL.ml.(modelID) = fit_PL_model(s,modelID,i);
+        end
+    end
+end
+
+%% 2. Visualize and compare models:
+% 'visualize_model_PL' is a function that calculates AIC and BIC for model comparison 
+% 'output' variable generated contains 'sum_all_aic' and 'sum_all_bic'
+output=visualize_model_PL(s.PL.ml,MODELS,nTrials,[1 0]);
+
+lowaicid = find(output.sum_all_aic == min(output.sum_all_aic)); % find the model number with the lowest aic
+lowbicid = find(output.sum_all_bic == min(output.sum_all_bic)); % find the model number with the lowest bic
+if lowaicid ~= lowbicid
+    if strcmp(aicorbic,'aic')
+        bestmodel = lowaicid;
+    elseif strcmp(aicorbic,'bic')
+        bestmodel = lowbicid;
+    else
+        error('Please specify at start whether to use aic or bic for model comparison')
+    end
+    disp('Best model depends on whether use AIC or BIC')
+    disp(['Model with lowest AIC is ',MODELS{1,lowaicid}])
+    disp(['Model with lowest BIC is ',MODELS{1,lowbicid}])
+    disp(['User specified to use ',upper(aicorbic),' for model comparison so selecting model ',MODELS{1,bestmodel}])
+elseif lowaicid == lowbicid
+    bestmodel = lowaicid;
+    disp(['Best model is ', MODELS{1,bestmodel}, ' regardless of whether use AIC or BIC'])
+end
+
+%%
+%%% plot choice probabilities generated by the model to check that the model does better than
+%%% chance (0.5). Turn off plotting of histograms if lots of ppts
+
+% for imod = 1:length(MODELS)
+%     modelID =  MODELS{imod};
+%      
+%     for sub=1:nSubs % loop through the number of ppts
+%         
+%         if doFigure ==1
+%         subplot(1,nSubs,sub) % create a plot with different subplots that is 1 row, columns of he number of ppts and makes one for each ppt(sub)
+%     
+%         cursubprob = s.PL.ml.(modelID){sub}.info.prob; 
+%         
+%         histogram([cursubprob])
+%         title(['Choice probabilities (subject ',num2str(sub),')'])
+%         figname=(['Choice probs RWPL', datestr(clock)]);
+%         full_figname=['figs/' figname  ];
+%         saveas(gcf,full_figname);
+%         
+%         end
+%         
+%         s.PL.ml.fit.(modelID).pseudoR2 = pseudoR2(s.PL,modelID,2,0);
+%         s.PL.ml.fit.(modelID).choiceProbR2 = choiceProbR2(s.PL,modelID,0);
+%         
+%     end
+% end
+
+% compareFitGroups = [(s.PL.ml.fit.(MODELS{1,bestmodel}).choiceProbR2.groups),(s.PL.ml.fit.(MODELS{1,bestmodel}).choiceProbR2.eachSubProbMedian)];
+% xlswrite('../Prosocial_learning_R_code/Compare_fit_between_groups.xlsx', compareFitGroups) % export xlsx file to analyse in R
+
+
+%% 3. store a new variables with the model parameters
+% you need to update this wih all for the new models that you add, it
+% saves the learning rate and beta parameters for each particiapnt
+    
+for sub=1:nSubs
+    
+    s.PL.ml.modelparamRWPL(sub,:)                = s.PL.ml.RWPL{1,sub}.x;
+    s.PL.ml.modelparamRWPL_SO_LR(sub,:)          = s.PL.ml.RWPL_SO_LR{1,sub}.x;
+    s.PL.ml.modelparamRWPL_SO_LR_comb(sub,:)     = s.PL.ml.RWPL_SO_LR_comb{1,sub}.x;
+    s.PL.ml.modelparamRWPL_SON_LR_SON_beta(sub,:)= s.PL.ml.RWPL_SON_LR_SON_beta{1,sub}.x;
+%     s.PL.ml.modelparamRWPL_qbias_SO(sub,:)      = s.PL.ml.RWPL_qbias_SO{1,sub}.x;
+%     s.PL.ml.modelparamRWPL_q0_SO_q_PLpha(sub,:) = s.PL.ml.RWPL_q0_SO_q_PLpha{1,sub}.x;
+    
+end
+
+% check the mean parameter values, beta, alpha (remove ;s to print to screen
+% for checking)
+mean(s.PL.ml.modelparamRWPL);  
+mean(s.PL.ml.modelparamRWPL_SO_LR);     
+mean(s.PL.ml.modelparamRWPL_SO_LR_comb); 
+mean(s.PL.ml.modelparamRWPL_SON_LR_SON_beta); 
+
+params = s.PL.ml.modelparamRWPL_SO_LR; 
+names = getparnames(MODELS{bestmodel});
+names = ['ID_Code', 'Group', names'];
+
+toSave = cell2table([ID_all,num2cell([groups,params])],'VariableNames', names);
+writetable(toSave,[output_dir, 'MLE_fit_parameters', suff, '.csv'])
+
+%% 4. If using with fMRI - Sort the model parameters for the chosen model so that they are in the sequence of trials in the actual task
+% Dependencies: 'sort_RL' function and make sure you save the trial index
+% using 'find' in the 's' variable
+
+% model2use = s.PL.ml.RWPL
+% 
+% %-----
+% 
+% for sub = 1:nSubs 
+%     
+%     PLl_ind_new{1,sub} = s.PL.beh{1,sub}.trialIndex
+%     
+% end;
+% 
+% rl_trialwise_mat=sort_RL(model2use, PLl_ind_new);
+% 
+% s.PL.ml.rl_triPLwise_mat = rl_triPLwise_mat;
+
+
+% cd(dir_output)
+%save ([dir_root, 'model_results_' ,group_name],'s')
+%save ([dir_root, 'model_summaries_' ,group_name],'output')
