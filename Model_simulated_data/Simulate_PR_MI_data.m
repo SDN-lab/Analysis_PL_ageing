@@ -16,10 +16,15 @@ beep off;
 % -------------------------------------------- %
 
 runPR = 1; % whether to run parameter recovery 1 = yes, 0 = no **
-runMI = 0; % whether to run model identifiability 1 = yes, 0 = no **
+runMI = 1; % whether to run model identifiability 1 = yes, 0 = no **
 
 mlePR = 2; % whether PR to run maximum likelihood = 1, or hierarchical em fit = 2 **
 mleMI = 2; % whether MI to run maximum likelihood = 1, or hierarchical em fit = 2 **
+
+nrep = 10; % how many iterations of mle fit to run
+% re-runs the fit so parameters don't get stuck in a local minima
+% can be 1 for decision-making tasks as unlikely to make a difference
+% but more important to be >1 for learning tasks
 
 % Specify model with which to generate simulated behaviour
 % -------------------------------------------- %
@@ -81,7 +86,7 @@ for tr = toRun
         
         for m = modelsTR % loop over model number(s) specified above
             
-            clearvars -except toRun* models* type *bounds *min *max stim nTrls nBlocks nSubj tr nRounds mle* r m all_*
+            clearvars -except toRun* models* type *bounds *min *max stim nTrls nBlocks nSubj tr nRounds mle* r m all_* nrep
             
             modelID = models{m};
             s.PL.expname = 'ProsocialLearn';
@@ -246,7 +251,7 @@ for tr = toRun
                         iter = 1;
                         maxit = 1000; % if not fitted after this many iterations then stop **
                         fitted = 0;
-                        while iter < 10 || fitted ~= 1 % if not fitted within 10 iterations keep going
+                        while iter < nrep || fitted ~= 1 % if not fitted within 10 iterations keep going
                             for param=1:nParam
                                 thisp=params{param};
                                 if contains(thisp, 'alpha') == 1
@@ -390,7 +395,7 @@ for tr = toRun
                     
                     msg = ['Finished mle model identifiability for ', modelID, ', round ', num2str(r),' of ', num2str(nRounds)];
                     
-                    [s, fits, fitMeasures] = mle_MI(s, models(modelsTR), 'aic');
+                    [s, fits, fitMeasures] = mle_MI(s, models(modelsTR), 'aic', nrep);
                     all_s{r,m} = s;
                     all_fits{r,m} = fits;
                     MIname = ['../Prosocial_learning_R_code/Model_identifiability_mle.xlsx'];
