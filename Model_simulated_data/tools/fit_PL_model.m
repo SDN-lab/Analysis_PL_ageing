@@ -1,4 +1,4 @@
-function [modelresults] = fit_PL_model(s, modelID)
+function [modelresults] = fit_PL_model(s, modelID, iteration)
 
 %INPUT:     - s: all behavioural data
 %           - modelID: string identifying which model to run
@@ -72,35 +72,55 @@ for j = 1:num_subs
         [out.x, out.fval, exitflag] = fminsearch(modelfun, Parameter,options,choice,outcome,block,agent,stim_props,outtype);
         out.modelID=modelID;
         %p,choice,outcome,block,agent,stim_props,outtype
+        
         %%% II.) Get modeled schedule:
         outtype=2;
         Parameter=out.x; %% NEED THIS PART; e.g [.1 .1]
         modelout=modelfun(Parameter,choice,outcome,block,agent,stim_props,outtype); %% NEED THIS PART. % another line where you have the nll
+        
         %%% III.) Now save:
-        modelresults{j}=out;
-        modelresults{j}.info=modelout;
         
-    elseif fit==2 % fit with average parameters
+        if  iteration == 1 % if the first run, save output
+            modelresults{j}=out;
+            modelresults{j}.info=modelout;
+        else % if not the first run then check whether fit is better
+            if out.fval < s.PL.ml.(modelID){j}.fval % if new fval lower (better) then update
+                out.xnames = s.PL.ml.(modelID){j}.xnames;
+                modelresults{j}=out;
+                modelresults{j}.info=modelout;
+                
+                % just for information:
+                fvaldiff = s.PL.ml.(modelID){j}.fval - out.fval;
+                %             if fvaldiff > 0.1
+                disp([modelID ' : better model found :-) Fval difference: '  num2str(fvaldiff)]);
+                %             end
+            else % if new fval not better then don't update
+                modelresults{j}=s.PL.ml.(modelID){j};
+                %             disp([modelID ' : no change'])
+            end
+        end
         
-        modelfun = str2func(['model_' modelID]);
-        outtype=2;
-        modelout=modelfun(Parameter,choice,stim_props,outtype);
-        %%% III.) Now save:
-        out.x = Parameter;
-        out.modelID=modelID;
-        s.AL.ml{j}=out;
-        s.AL.ml{j}.info=modelout;
-        
-   elseif fit==3 % fit with single subject
-        
-        modelfun = str2func(['model_' modelID]);
-        outtype=1;
-        modelout=modelfun(Parameter,choice,self_cor,fri_cho,fri_cor,str_cho,str_cor,stim_props,start_bias,outtype);keyboard;
-        %%% III.) Now save:
-        out.x = Parameter;
-        out.modelID=modelID;
-        s.AL.ml{j}=out;
-        s.AL.ml{j}.info=modelout;
+%     elseif fit==2 % fit with average parameters
+%         
+%         modelfun = str2func(['model_' modelID]);
+%         outtype=2;
+%         modelout=modelfun(Parameter,choice,stim_props,outtype);
+%         %%% III.) Now save:
+%         out.x = Parameter;
+%         out.modelID=modelID;
+%         s.AL.ml{j}=out;
+%         s.AL.ml{j}.info=modelout;
+%         
+%    elseif fit==3 % fit with single subject
+%         
+%         modelfun = str2func(['model_' modelID]);
+%         outtype=1;
+%         modelout=modelfun(Parameter,choice,self_cor,fri_cho,fri_cor,str_cho,str_cor,stim_props,start_bias,outtype);keyboard;
+%         %%% III.) Now save:
+%         out.x = Parameter;
+%         out.modelID=modelID;
+%         s.AL.ml{j}=out;
+%         s.AL.ml{j}.info=modelout;
         
     end
 end

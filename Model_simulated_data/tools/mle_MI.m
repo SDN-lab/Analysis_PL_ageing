@@ -1,4 +1,4 @@
-function [s, fits, fitMeasures] = mle_MI(s, modelsTR, beston)
+function [s, fits, fitMeasures] = mle_MI(s, modelsTR, beston, nrep)
 % Fits RL models with mle and does model comparison on simulated data for model
 % identifiability
 % Patricia Lockwood, January 2020, Based on code by MK Wittmann, October 2018
@@ -27,7 +27,9 @@ for iexp = 1:numel(expids)
 
    %%% MLE fit %%%
    for im = 1:numel(M.modid) % for the number of models
-       s.(cur_exp).ml.(M.modid{im}) = fit_PL_model(s,M.modid{im});
+       for i=1:nrep
+           s.(cur_exp).ml.(M.modid{im}) = fit_PL_model(s,M.modid{im}, i);
+       end
    end
 end
 
